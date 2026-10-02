@@ -730,7 +730,7 @@ let tLevel="1AC",tSel=[],confirmWipe=false;
 /* Comptes professeurs : chaque prof crée son compte avec le code d'établissement.
    Les comptes sont enregistrés sur l'appareil (empreinte SHA-256 salée, jamais le mot de passe). */
 const ADMIN_HASH="d9250278dee90a2d2ce5c5b3bd80272bfd065c9c32315c299fbdeca640180e9b";
-const INVITE_HASH="469813128b03840252774d481583f97bd775047965cfc936c0a0c547046051f6";
+const INVITE_HASH="bfc6fc7c67723e8dac6e5031bad3b1b8b1fe2476753e8efdbb5cecc25aacf7a1";
 let profUser=null,fails=0,lockUntil=0,authMode="in";
 async function sha256(s){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
 const accounts=()=>LS.get("lq-accounts",{});
@@ -779,7 +779,7 @@ function login(){
         if(u==="prof"||accounts()[u])return fail("Cet identifiant existe déjà sur cet appareil. Choisissez-en un autre.");
         if(pw.length<6)return fail("Le mot de passe doit avoir au moins 6 caractères.");
         if(pw!==document.getElementById("pw2").value)return fail("Les deux mots de passe ne sont pas identiques.");
-        const inv=document.getElementById("inv").value.trim().toUpperCase();
+        const inv=document.getElementById("inv").value.replace(/\s+/g,"").toUpperCase();
         if(await sha256("laboqcm-invite|"+inv)!==INVITE_HASH){fails++;if(fails>=5){lockUntil=Date.now()+30000;fails=0}return fail("Code d'établissement incorrect. Demandez-le au responsable.")}
         const salt=[...crypto.getRandomValues(new Uint8Array(8))].map(x=>x.toString(16).padStart(2,"0")).join("");
         const h=await sha256("laboqcm|"+u+"|"+salt+"|"+pw);
