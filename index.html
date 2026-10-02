@@ -631,6 +631,17 @@ function parseCode(c){
   const n=idx.reduce((t,i)=>t+L.chapters[i].qs.length,0);
   return{level:m[1],idx,code:makeCode(m[1],idx),n};
 }
+/* ---------- Lien du quiz : #CODE&m=e-mail du professeur ---------- */
+const MAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+function readLink(){
+  const parts=location.hash.slice(1).split("&");let code="",mail="";
+  try{code=decodeURIComponent(parts[0]||"")}catch(e){}
+  parts.slice(1).forEach(x=>{if(x.slice(0,2)==="m="){try{mail=decodeURIComponent(x.slice(2)).trim()}catch(e){}}});
+  const pre=parseCode(code);
+  return pre?{pre,mail:MAIL_RE.test(mail)?mail:""}:null;
+}
+/* E-mail du professeur reçu par le lien, pour ce quiz */
+const mailFor=quiz=>{const k=LS.get("lq-linkmail",null);return k&&k.quiz===quiz&&MAIL_RE.test(k.mail||"")?k.mail:""};
 /* ---------- Signature des résultats (empêche de modifier la note dans le message) ---------- */
 function hash(s){let h=2166136261;for(const ch of s){h^=ch.codePointAt(0);h=Math.imul(h,16777619)>>>0}
   let h2=h;for(const ch of s+SALT){h2^=ch.codePointAt(0);h2=Math.imul(h2,2654435761)>>>0}
@@ -648,7 +659,8 @@ function nowStr(){const d=new Date(),p=n=>String(n).padStart(2,"0");return`${p(d
 
 /* ================= ACCUEIL ÉLÈVE ================= */
 function home(){
-  const pre=parseCode(location.hash.slice(1));
+  const lk=readLink(),pre=lk&&lk.pre;
+  if(lk&&lk.mail){LS.set("lq-linkmail",{quiz:pre.code,mail:lk.mail});LS.set("lq-profmail",lk.mail)}
   const me=LS.get("lq-me",{name:"",cls:""});
   $app.style.setProperty("--lc","var(--c2)");
   $app.innerHTML=`
@@ -681,7 +693,7 @@ function home(){
     if(done&&norm(done.rec.name)===norm(name))return examResult(done);
     let run=LS.get("lq-run",null);
     if(!run||run.quiz!==code.code||norm(run.name)!==norm(name)){
-      run={name,cls,quiz:code.code,level:code.level,qs:toQuestions(poolOf(code.level,code.idx),QN),i:0,picks:[]};
+      run={name,cls,quiz:code.code,level:code.level,qs:toQuestions(poolOf(code.level,code.idx),QN),i:0,picks:[],mail:mailFor(code.code)};
       LS.set("lq-run",run);
     }
     examAsk(run);
@@ -705,20 +717,21 @@ function examAsk(run){
     if(run.i<n)return examAsk(run);
     const score=run.qs.filter((x,k)=>x.answer===run.picks[k]).length;
     const rec={name:run.name,cls:run.cls,quiz:run.quiz,score,total:n,date:nowStr()};rec.sig=sign(rec);
-    const done={rec,level:run.level,qs:run.qs,picks:run.picks};
+    const done={rec,level:run.level,qs:run.qs,picks:run.picks,mail:run.mail||mailFor(run.quiz)};
     LS.set("lq-done-"+run.quiz,done);LS.del("lq-run");examResult(done);
   };
 }
 function examResult(done){
-  const r=done.rec,s=starsOf(r.score/r.total),msg=message(r);setColor(done.level);
+  const r=done.rec,s=starsOf(r.score/r.total),msg=message(r),to=done.mail||mailFor(r.quiz);setColor(done.level);
   $app.innerHTML=`
   <section class="board result"><span class="label" style="color:var(--boardink);opacity:.85">${esc(r.name)} · ${esc(r.cls)} · Quiz ${r.quiz}</span>
     <div class="big">${r.score}/${r.total}</div><div class="stars">${starsHTML(s)}</div><p>Terminé le ${esc(r.date)}</p></section>
   <div class="card form"><h2>Envoie ta note à ton professeur</h2>
     <p class="muted">Envoie ce message par e-mail, ou copie-le pour l'envoyer autrement (WhatsApp…). Ne le modifie pas : sinon il sera refusé.</p>
     <div class="msg" id="msg">${esc(msg)}</div>
-    <label for="pm">E-mail de ton professeur</label>
-    <input id="pm" type="email" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="80" placeholder="exemple : professeur@gmail.com" value="${esc(LS.get("lq-profmail",""))}">
+    ${to?`<p style="margin:0">Ton professeur : <b style="overflow-wrap:anywhere">${esc(to)}</b></p>`
+    :`<label for="pm">E-mail de ton professeur</label>
+    <input id="pm" type="email" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="80" placeholder="exemple : professeur@gmail.com" value="${esc(LS.get("lq-profmail",""))}">`}
     <p class="err" id="merr" hidden></p>
     <div class="row"><a class="small-btn" id="mail" href="mailto:">Envoyer par e-mail</a><button type="button" class="small-btn ghost" id="cp">Copier le message</button></div>
     <p class="muted">Ton application e-mail s'ouvre avec le message prêt. Il part seulement quand tu appuies sur « Envoyer ».</p></div>
@@ -729,13 +742,14 @@ function examResult(done){
   document.getElementById("cp").onclick=e=>copyText(msg,e.currentTarget);
   /* Envoi par e-mail : ouvre l'application e-mail de l'élève avec le message prêt (rien n'est envoyé par Labo QCM). */
   const $pm=document.getElementById("pm"),$mail=document.getElementById("mail"),$merr=document.getElementById("merr");
-  const mailHref=()=>"mailto:"+encodeURIComponent($pm.value.trim())+"?subject="+encodeURIComponent(`Labo QCM - ${r.name} - ${r.cls} - Quiz ${r.quiz}`)+"&body="+encodeURIComponent(msg);
+  const addr=()=>to||($pm?$pm.value.trim():"");
+  const mailHref=()=>"mailto:"+encodeURIComponent(addr())+"?subject="+encodeURIComponent(`Labo QCM - ${r.name} - ${r.cls} - Quiz ${r.quiz}`)+"&body="+encodeURIComponent(msg);
   $mail.href=mailHref();
-  $pm.oninput=()=>{$merr.hidden=true;$mail.href=mailHref()};
+  if($pm)$pm.oninput=()=>{$merr.hidden=true;$mail.href=mailHref()};
   $mail.onclick=e=>{
-    const a=$pm.value.trim();
-    if(a&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(a)){e.preventDefault();$merr.textContent="Cette adresse e-mail n'est pas correcte. Vérifie-la avec ton professeur.";$merr.hidden=false;$pm.focus();return}
-    $merr.hidden=true;LS.set("lq-profmail",a);$mail.href=mailHref();
+    const a=addr();
+    if(a&&!MAIL_RE.test(a)){e.preventDefault();$merr.textContent="Cette adresse e-mail n'est pas correcte. Vérifie-la avec ton professeur.";$merr.hidden=false;if($pm)$pm.focus();return}
+    $merr.hidden=true;if(!to)LS.set("lq-profmail",a);$mail.href=mailHref();
   };
   document.getElementById("home").onclick=home;
 }
@@ -816,6 +830,9 @@ function teacher(){
   setColor(tLevel);
   const L=BANK[tLevel];
   const code=tSel.length?makeCode(tLevel,tSel):null;
+  const tMail=LS.get("lq-mail-"+profUser,"");
+  const base=/^https?:$/.test(location.protocol)?location.origin+location.pathname:"";
+  const link=code&&base?base+"#"+code+(tMail?"&m="+encodeURIComponent(tMail):""):"";
   const nAvail=tSel.reduce((t,i)=>t+L.chapters[i].qs.length,0);
   const grades=LS.get(gradesKey(),[]).slice().sort((a,b)=>a.cls.localeCompare(b.cls)||a.name.localeCompare(b.name));
   const valid=grades.filter(g=>g.valid);
@@ -823,6 +840,13 @@ function teacher(){
   $app.innerHTML=`
   <div class="top" style="justify-content:space-between"><button class="back" id="back">← Accueil</button><span class="row"><span class="count">${esc(profUser)}</span><button class="small-btn ghost" id="logout">Se déconnecter</button></span></div>
   <section class="board"><h1>Espace professeur</h1><p>Choisissez les leçons pour créer un code de quiz. Chaque élève reçoit ${QN} questions tirées au hasard dans ces leçons.</p></section>
+  <div class="card form">
+    <h2>Votre e-mail</h2>
+    <p class="muted">Vos élèves vous enverront leur note à cette adresse. Elle est ajoutée au lien du quiz : les élèves n'ont pas à la saisir.</p>
+    <label for="tmail">E-mail du professeur</label>
+    <input id="tmail" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" maxlength="80" placeholder="exemple : professeur@gmail.com" value="${esc(tMail)}">
+    <div class="row"><button type="button" class="small-btn" id="savemail">Enregistrer</button><span id="mailst" aria-live="polite"></span></div>
+  </div>
   <div class="card">
     <h2>1. Créer un quiz</h2>
     <div class="tabs">${Object.keys(BANK).map(k=>`<button class="tab" style="--lc:${BANK[k].color}" data-l="${k}" aria-selected="${k===tLevel}">${k}<small>${BANK[k].sub}</small></button>`).join("")}</div>
@@ -830,7 +854,12 @@ function teacher(){
     <div class="row" style="justify-content:space-between"><span class="label">Semestre ${s+1} · ${esc(sn)}</span><button class="small-btn ghost semall" data-s="${s}">${all?"Tout décocher":"Tout cocher"}</button></div>
     <div class="checks">${ids.map(i=>{const c=L.chapters[i];return`<label class="check"><input type="checkbox" id="ch-${tLevel}-${i}" data-i="${i}" ${tSel.includes(i)?"checked":""}><span>${i+1}. ${esc(c.name)}</span><small>${c.qs.length} q.</small></label>`}).join("")}</div>`}).join("")}
     ${code?`<div class="codebox"><div><div class="label" style="color:var(--boardink);opacity:.8">Code à donner aux élèves</div><div class="code">${code}</div></div><button class="small-btn" id="cpcode">Copier le code</button></div>
-      <p class="muted">${nAvail} questions disponibles.${nAvail<QN?` Attention : moins de ${QN}, chaque élève aura ${nAvail} questions. Cochez une autre leçon pour arriver à ${QN}.`:""} Écrivez le code au tableau. Vous pouvez aussi ajouter <b>#${code}</b> à la fin du lien de la page : le code sera déjà rempli pour les élèves.</p>`
+      <p class="muted">${nAvail} questions disponibles.${nAvail<QN?` Attention : moins de ${QN}, chaque élève aura ${nAvail} questions. Cochez une autre leçon pour arriver à ${QN}.`:""}</p>
+      ${link?`<div class="label">Lien du quiz pour les élèves</div>
+      <div class="msg" id="qlink">${esc(link)}</div>
+      <div class="row"><button class="small-btn" id="cplink">Copier le lien</button></div>
+      <p class="muted">${tMail?`Envoyez ce lien à vos élèves (groupe WhatsApp de la classe…). Le code est déjà rempli et le bouton « Envoyer par e-mail » leur fera envoyer la note à <b style="overflow-wrap:anywhere">${esc(tMail)}</b>.`:`Envoyez ce lien à vos élèves : le code est déjà rempli. Enregistrez votre e-mail plus haut pour qu'ils vous envoient leur note par e-mail sans saisir votre adresse.`} Si un élève tape seulement le code écrit au tableau, il devra saisir votre adresse lui-même.</p>`
+      :`<p class="muted">Écrivez le code au tableau.</p>`}`
       :`<p class="muted">Cochez au moins une leçon pour obtenir le code.</p>`}
   </div>
   <div class="card">
@@ -854,6 +883,14 @@ function teacher(){
   $app.querySelectorAll(".semall").forEach(b=>b.onclick=()=>{const s=+b.dataset.s;const ids=L.chapters.map((c,i)=>c.sem===s?i:-1).filter(i=>i>=0);const all=ids.every(i=>tSel.includes(i));tSel=all?tSel.filter(i=>!ids.includes(i)):[...new Set([...tSel,...ids])];teacher()});
   $app.querySelectorAll(".check input").forEach(c=>c.onchange=()=>{const i=+c.dataset.i;tSel=c.checked?[...tSel,i]:tSel.filter(x=>x!==i);teacher()});
   if(code)document.getElementById("cpcode").onclick=e=>copyText(code,e.currentTarget);
+  if(link)document.getElementById("cplink").onclick=e=>copyText(link,e.currentTarget);
+  document.getElementById("savemail").onclick=()=>{
+    const v=document.getElementById("tmail").value.trim(),st=document.getElementById("mailst");
+    if(v&&!MAIL_RE.test(v)){st.innerHTML=`<span class="err">Cette adresse n'est pas correcte.</span>`;return}
+    if(v)LS.set("lq-mail-"+profUser,v);else LS.del("lq-mail-"+profUser);
+    teacher();
+    document.getElementById("mailst").innerHTML=`<span class="ok-text">${v?"E-mail enregistré.":"E-mail supprimé."}</span>`;
+  };
   document.getElementById("add").onclick=()=>{
     const lines=document.getElementById("paste").value.replace(/\s+/g," ").split(/(?=LaboQCM\s*\|)/i).map(parseMessage).filter(Boolean);
     const st=document.getElementById("status");
