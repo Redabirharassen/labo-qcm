@@ -113,6 +113,7 @@ button{font:inherit}
 .codebox .code{font-family:var(--display);font-size:2rem;color:var(--chalk);letter-spacing:.04em;line-height:1}
 .small-btn{all:unset;cursor:pointer;font-weight:800;font-size:.9rem;padding:8px 14px;border-radius:10px;background:var(--ink);color:var(--bg);text-align:center}
 .codebox .small-btn{background:var(--chalk);color:#1b2a26}
+.small-btn{display:inline-block;box-sizing:border-box}
 .small-btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
 .small-btn.danger{background:var(--bad);color:#fff}
 .small-btn:focus-visible{outline:3px solid var(--c2);outline-offset:2px}
@@ -640,7 +641,7 @@ function parseMessage(line){
   if(!/LaboQCM/i.test(line))return null;
   const g=k=>{const m=line.match(new RegExp("\\b"+k+":\\s*([^|]*)"));return m?m[1].trim():""};
   const note=g("Note").match(/(\d+)\s*\/\s*(\d+)/);if(!g("Nom")||!note)return null;
-  const r={name:g("Nom"),cls:g("Classe"),quiz:g("Quiz"),score:+note[1],total:+note[2],date:g("Date"),sig:g("Code").toUpperCase()};
+  const r={name:g("Nom"),cls:g("Classe"),quiz:g("Quiz"),score:+note[1],total:+note[2],date:g("Date"),sig:(g("Code").match(/[0-9a-z]+/i)||[""])[0].toUpperCase()};
   r.valid=sign(r)===r.sig;return r;
 }
 function nowStr(){const d=new Date(),p=n=>String(n).padStart(2,"0");return`${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`}
@@ -713,15 +714,29 @@ function examResult(done){
   $app.innerHTML=`
   <section class="board result"><span class="label" style="color:var(--boardink);opacity:.85">${esc(r.name)} · ${esc(r.cls)} · Quiz ${r.quiz}</span>
     <div class="big">${r.score}/${r.total}</div><div class="stars">${starsHTML(s)}</div><p>Terminé le ${esc(r.date)}</p></section>
-  <div class="card"><h2>Envoie ta note à ton professeur</h2>
-    <p class="muted">Copie ce message et envoie-le à ton professeur (WhatsApp, e-mail…). Ne le modifie pas : sinon il sera refusé.</p>
+  <div class="card form"><h2>Envoie ta note à ton professeur</h2>
+    <p class="muted">Envoie ce message par e-mail, ou copie-le pour l'envoyer autrement (WhatsApp…). Ne le modifie pas : sinon il sera refusé.</p>
     <div class="msg" id="msg">${esc(msg)}</div>
-    <button class="small-btn" id="cp">Copier le message</button></div>
+    <label for="pm">E-mail de ton professeur</label>
+    <input id="pm" type="email" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="80" placeholder="exemple : professeur@gmail.com" value="${esc(LS.get("lq-profmail",""))}">
+    <p class="err" id="merr" hidden></p>
+    <div class="row"><a class="small-btn" id="mail" href="mailto:">Envoyer par e-mail</a><button type="button" class="small-btn ghost" id="cp">Copier le message</button></div>
+    <p class="muted">Ton application e-mail s'ouvre avec le message prêt. Il part seulement quand tu appuies sur « Envoyer ».</p></div>
   <div class="label">Correction</div>
   <div class="review">${done.qs.map((q,k)=>{const ok=q.answer===done.picks[k];return`<div class="corr ${ok?"":"wrong"}"><b>${k+1}.</b> ${esc(q.text)}<br>
     ${ok?`<span class="good">✓ ${esc(q.answer)}</span>`:`<span class="you">✗ Ta réponse : ${esc(done.picks[k])}</span><br><span class="good">✓ ${esc(q.answer)}</span>`}<br>${esc(q.exp)}</div>`}).join("")}</div>
   <button class="btn ghost" id="home">Retour à l'accueil</button>`;
   document.getElementById("cp").onclick=e=>copyText(msg,e.currentTarget);
+  /* Envoi par e-mail : ouvre l'application e-mail de l'élève avec le message prêt (rien n'est envoyé par Labo QCM). */
+  const $pm=document.getElementById("pm"),$mail=document.getElementById("mail"),$merr=document.getElementById("merr");
+  const mailHref=()=>"mailto:"+encodeURIComponent($pm.value.trim())+"?subject="+encodeURIComponent(`Labo QCM - ${r.name} - ${r.cls} - Quiz ${r.quiz}`)+"&body="+encodeURIComponent(msg);
+  $mail.href=mailHref();
+  $pm.oninput=()=>{$merr.hidden=true;$mail.href=mailHref()};
+  $mail.onclick=e=>{
+    const a=$pm.value.trim();
+    if(a&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(a)){e.preventDefault();$merr.textContent="Cette adresse e-mail n'est pas correcte. Vérifie-la avec ton professeur.";$merr.hidden=false;$pm.focus();return}
+    $merr.hidden=true;LS.set("lq-profmail",a);$mail.href=mailHref();
+  };
   document.getElementById("home").onclick=home;
 }
 
@@ -840,7 +855,7 @@ function teacher(){
   $app.querySelectorAll(".check input").forEach(c=>c.onchange=()=>{const i=+c.dataset.i;tSel=c.checked?[...tSel,i]:tSel.filter(x=>x!==i);teacher()});
   if(code)document.getElementById("cpcode").onclick=e=>copyText(code,e.currentTarget);
   document.getElementById("add").onclick=()=>{
-    const lines=document.getElementById("paste").value.split(/\n+/).map(parseMessage).filter(Boolean);
+    const lines=document.getElementById("paste").value.replace(/\s+/g," ").split(/(?=LaboQCM\s*\|)/i).map(parseMessage).filter(Boolean);
     const st=document.getElementById("status");
     if(!lines.length){st.innerHTML=`<span class="err">Aucun message LaboQCM reconnu.</span>`;return}
     const all=LS.get(gradesKey(),[]);let added=0;
