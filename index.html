@@ -1,0 +1,925 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Labo QCM : QCM de physique-chimie pour le collège (1AC, 2AC, 3AC).">
+<meta name="theme-color" content="#22463d">
+<title>Labo QCM Collège</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;600;700;800&display=swap">
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<style>
+/* Layout: une colonne type téléphone ; accueil = tableau noir + onglets de niveau + liste des leçons ; quiz = énoncé au tableau, réponses A–D empilées */
+:root{
+  --bg:#edf2f0; --surface:#ffffff; --ink:#1b2a26; --muted:#5a6d67; --line:#d2dcd8;
+  --board:#22463d; --boardink:#f2f6f3; --chalk:#f5df72; --good:#2e8b57; --bad:#c2453b;
+  --c1:#e3a93b; --c2:#4f9cc4; --c3:#d26f55;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121e1b; --surface:#1b2b27; --ink:#e8f0ed; --muted:#9db1aa; --line:#2e443e;
+  --board:#295449; --good:#5cc286; --bad:#ec7a6f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121e1b; --surface:#1b2b27; --ink:#e8f0ed; --muted:#9db1aa; --line:#2e443e;
+  --board:#295449; --good:#5cc286; --bad:#ec7a6f; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding:16px;padding-block:16px 32px}
+.app{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.15;text-wrap:balance}
+button{font:inherit}
+.board{background:var(--board);color:var(--boardink);border-radius:18px;padding:20px;position:relative;overflow:hidden}
+.board h1{font-size:2rem;color:var(--chalk)}
+.board p{margin:6px 0 0;opacity:.92;max-width:40ch}
+.board .formula{position:absolute;right:-6px;bottom:-18px;font-family:var(--display);font-size:3.6rem;color:#fff;opacity:.08;white-space:nowrap;pointer-events:none}
+.stats{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.chip{background:rgba(255,255,255,.13);border-radius:999px;padding:3px 12px;font-weight:700;font-size:.85rem;font-variant-numeric:tabular-nums}
+.label{font-size:.75rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tab{all:unset;cursor:pointer;text-align:center;padding:10px 4px;border-radius:14px;border:2px solid var(--line);background:var(--surface);font-family:var(--display);font-size:1.25rem;line-height:1.1}
+.tab small{display:block;font-family:var(--body);font-size:.72rem;color:var(--muted);font-weight:700}
+.tab[aria-selected="true"]{background:var(--lc);border-color:var(--lc);color:#1b2a26}
+.tab[aria-selected="true"] small{color:#1b2a26}
+.tab:focus-visible,.lesson:focus-visible,.opt:focus-visible,.btn:focus-visible,.back:focus-visible{outline:3px solid var(--c2);outline-offset:2px}
+.lessons{display:flex;flex-direction:column;gap:10px}
+.lesson{all:unset;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:12px 14px;transition:border-color .15s,transform .15s}
+.lesson:hover{border-color:var(--lc);transform:translateX(2px)}
+.lesson .num{width:40px;height:40px;border-radius:12px;background:var(--lc);color:#1b2a26;display:grid;place-items:center;font-family:var(--display);font-size:1.15rem}
+.lesson .txt{min-width:0}
+.lesson h3{font-size:1.08rem}
+.lesson small{color:var(--muted);font-size:.85rem}
+.lesson.mix{background:var(--board);border-color:var(--board);color:var(--boardink)}
+.lesson.mix small{color:var(--boardink);opacity:.8}
+.lesson.mix .num{background:var(--chalk)}
+.stars{color:var(--c1);letter-spacing:1px;white-space:nowrap}
+.stars .off{color:var(--line)}
+.lesson.mix .stars .off{color:rgba(255,255,255,.25)}
+/* quiz */
+.top{display:flex;align-items:center;gap:12px}
+.back{all:unset;cursor:pointer;font-weight:800;color:var(--muted);padding:6px 2px}
+.bar{flex:1;height:10px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--lc);transition:width .3s}
+.count{font-variant-numeric:tabular-nums;font-weight:800;color:var(--muted)}
+.question{background:var(--board);color:var(--boardink);border-radius:18px;padding:22px 20px;display:flex;flex-direction:column;gap:8px}
+.question .tag{font-size:.75rem;letter-spacing:.09em;text-transform:uppercase;opacity:.8;font-weight:800}
+.question .q{font-family:var(--display);font-size:clamp(1.25rem,5.2vw,1.6rem);color:var(--chalk);line-height:1.25;overflow-wrap:anywhere}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{all:unset;cursor:pointer;display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:center;background:var(--surface);border:2px solid var(--line);border-radius:14px;padding:12px 14px;font-weight:700;min-width:0}
+.opt span:last-child{min-width:0;overflow-wrap:anywhere}
+.opt .letter{width:34px;height:34px;border-radius:10px;background:var(--bg);display:grid;place-items:center;font-family:var(--display);color:var(--muted)}
+.opt:hover:not(:disabled){border-color:var(--lc)}
+.opt:disabled{cursor:default}
+.opt.ok{border-color:var(--good);background:color-mix(in srgb,var(--good) 14%,var(--surface))}
+.opt.ok .letter{background:var(--good);color:#fff}
+.opt.ko{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,var(--surface))}
+.opt.ko .letter{background:var(--bad);color:#fff}
+.explain{border-radius:14px;padding:12px 14px;border:2px solid;font-size:.95rem}
+.explain.ok{border-color:var(--good)} .explain.ko{border-color:var(--bad)}
+.explain b{display:block;font-family:var(--display);font-size:1.1rem}
+.explain.ok b{color:var(--good)} .explain.ko b{color:var(--bad)}
+.btn{all:unset;cursor:pointer;text-align:center;background:var(--ink);color:var(--bg);padding:14px;border-radius:14px;font-family:var(--display);font-size:1.15rem}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.result{text-align:center;display:flex;flex-direction:column;gap:6px;align-items:center}
+.result .big{font-family:var(--display);font-size:4rem;line-height:1;color:var(--chalk);font-variant-numeric:tabular-nums}
+.result .stars{font-size:2rem}
+.actions{display:grid;gap:10px}
+.review{display:flex;flex-direction:column;gap:8px}
+.miss{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--bad);border-radius:10px;padding:10px 12px;font-size:.92rem}
+.miss .good{color:var(--good);font-weight:800}
+.tip{border:1px dashed var(--line);border-radius:14px;padding:12px 14px;font-size:.88rem;color:var(--muted)}
+@keyframes pop{from{transform:scale(.97)}to{transform:scale(1)}}
+.pop{animation:pop .2s ease-out}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.card{background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card h2{font-size:1.3rem}
+.form label{font-weight:800;font-size:.9rem;margin-bottom:-6px}
+.form input,textarea{font:inherit;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:11px 12px;width:100%;min-width:0}
+.form input:focus,textarea:focus{outline:none;border-color:var(--c2)}
+.err{color:var(--bad);font-weight:700;margin:0}
+.ok-text{color:var(--good);font-weight:700;margin:0}
+.muted{color:var(--muted);font-size:.9rem;margin:0}
+.link{all:unset;cursor:pointer;color:var(--muted);font-weight:700;text-decoration:underline;text-underline-offset:3px;text-align:center;padding:6px}
+.link:focus-visible{outline:3px solid var(--c2)}
+.opt.sel{border-color:var(--lc);background:color-mix(in srgb,var(--lc) 18%,var(--surface))}
+.opt.sel .letter{background:var(--lc);color:#1b2a26}
+.btn:disabled{opacity:.45;cursor:default}
+.checks{display:flex;flex-direction:column;gap:8px}
+.check{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:10px 12px;border:2px solid var(--line);border-radius:12px;cursor:pointer}
+.check:has(input:checked){border-color:var(--lc);background:color-mix(in srgb,var(--lc) 12%,var(--surface))}
+.check input{width:20px;height:20px;accent-color:var(--board)}
+.check small{color:var(--muted);white-space:nowrap}
+.codebox{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--board);color:var(--boardink);border-radius:14px;padding:14px 16px}
+.codebox .code{font-family:var(--display);font-size:2rem;color:var(--chalk);letter-spacing:.04em;line-height:1}
+.small-btn{all:unset;cursor:pointer;font-weight:800;font-size:.9rem;padding:8px 14px;border-radius:10px;background:var(--ink);color:var(--bg);text-align:center}
+.codebox .small-btn{background:var(--chalk);color:#1b2a26}
+.small-btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.small-btn.danger{background:var(--bad);color:#fff}
+.small-btn:focus-visible{outline:3px solid var(--c2);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.msg{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.82rem;background:var(--bg);border:1px dashed var(--line);border-radius:10px;padding:10px;overflow-wrap:anywhere;user-select:all}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:.9rem;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+.pill{display:inline-block;font-size:.75rem;font-weight:800;padding:2px 8px;border-radius:99px}
+.pill.ok{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--good)}
+.pill.ko{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.summary div{background:var(--bg);border-radius:12px;padding:10px;text-align:center}
+.summary b{display:block;font-family:var(--display);font-size:1.5rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.summary span{font-size:.75rem;color:var(--muted);font-weight:700}
+.corr{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--good);border-radius:10px;padding:10px 12px;font-size:.92rem}
+.corr.wrong{border-left-color:var(--bad)}
+.corr .you{color:var(--bad);font-weight:800}
+.corr .good{color:var(--good);font-weight:800}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+/* Banque de questions : [énoncé, [bonne réponse, distracteur, distracteur, distracteur], explication] */
+const BANK={
+"1AC":{color:"var(--c1)",sub:"1ère année",sems:["Matière et environnement","Électricité"],chapters:[
+{sem:0,name:"L'eau dans la nature",qs:[
+["L'eau recouvre environ quelle part de la surface de la Terre ?",["70 %","10 %","30 %","100 %"],"On appelle la Terre la « planète bleue » : environ 70 % de sa surface est couverte d'eau."],
+["La plus grande partie de l'eau sur Terre se trouve :",["dans les mers et les océans (eau salée)","dans les rivières","dans les nappes souterraines","dans les nuages"],"Environ 97 % de l'eau est salée. L'eau douce ne représente qu'environ 3 %."],
+["Le changement d'état qui fait passer l'eau des océans dans l'atmosphère est :",["l'évaporation","la solidification","la fusion","la liquéfaction"],"Chauffée par le Soleil, l'eau s'évapore et forme de la vapeur d'eau."],
+["Les nuages sont formés de :",["fines gouttelettes d'eau liquide et de cristaux de glace","vapeur d'eau seulement","fumée","poussière seulement"],"La vapeur d'eau est invisible. Les nuages sont faits d'eau liquide ou solide."],
+["Dans le cycle de l'eau, la pluie et la neige s'appellent :",["les précipitations","l'évaporation","la condensation","l'infiltration"],"L'eau retombe sur le sol sous forme de pluie, de neige ou de grêle."],
+["L'eau qui pénètre dans le sol peut former :",["des nappes phréatiques (eaux souterraines)","des nuages","des glaciers","des océans"],"C'est l'infiltration. Les puits puisent l'eau des nappes souterraines."],
+["Sous quels états l'eau existe-t-elle dans la nature ?",["solide, liquide et gazeux","seulement liquide","seulement liquide et gazeux","seulement solide"],"Glace et neige (solide), mers et rivières (liquide), vapeur d'eau (gaz)."]]},
+{sem:0,name:"Les trois états physiques de la matière",qs:[
+["L'eau d'un glaçon est à l'état :",["solide","liquide","gazeux","vapeur"],"Le glaçon a une forme propre : c'est l'état solide."],
+["Un solide :",["a une forme propre et un volume propre","prend la forme du récipient","occupe tout l'espace disponible","est facilement compressible"],"Un solide garde sa forme et son volume."],
+["Un liquide :",["n'a pas de forme propre mais a un volume propre","a une forme propre","n'a ni forme ni volume propre","est facilement compressible"],"Un liquide prend la forme du récipient, mais son volume ne change pas."],
+["Un gaz :",["n'a ni forme propre ni volume propre","a une forme propre","a un volume propre","est incompressible"],"Un gaz occupe tout le volume qui lui est offert."],
+["La surface libre d'un liquide au repos est :",["plane et horizontale","verticale","toujours courbée vers le haut","inclinée"],"Quel que soit le récipient, la surface libre d'un liquide au repos est horizontale."],
+["Le sable sec :",["est un solide en grains","est un liquide","est un gaz","n'a pas d'état physique"],"Le sable prend la forme du récipient, mais chaque grain est un solide."],
+["La vapeur d'eau est :",["un gaz invisible","un liquide","un solide","de la fumée blanche"],"Le « nuage » au-dessus d'une casserole est de l'eau liquide en gouttelettes, pas de la vapeur."]]},
+{sem:0,name:"Volume d'un liquide et d'un solide",qs:[
+["Le volume d'un liquide se mesure avec :",["une éprouvette graduée","une balance","un thermomètre","un manomètre"],"L'éprouvette graduée permet de lire directement le volume."],
+["L'unité internationale de volume est :",["le mètre cube (m³)","le litre (L)","le kilogramme (kg)","le mètre (m)"],"Le litre est une unité usuelle : 1 L = 1 dm³."],
+["1 L est égal à :",["1 dm³","1 cm³","1 m³","10 cm³"],"1 L = 1 dm³ = 1000 cm³."],
+["1 mL est égal à :",["1 cm³","1 dm³","10 cm³","1 m³"],"1 mL = 1 cm³."],
+["250 mL correspondent à :",["0,25 L","2,5 L","25 L","0,025 L"],"250 mL = 250 / 1000 L = 0,25 L."],
+["Pour lire un volume dans une éprouvette, l'œil se place :",["au niveau du bas du ménisque","au-dessus de l'éprouvette","sous l'éprouvette","au niveau du haut de l'éprouvette"],"L'œil doit être à l'horizontale du bas du ménisque pour éviter l'erreur de lecture."],
+["Le volume d'un caillou se mesure :",["par déplacement d'eau dans une éprouvette","avec une balance","avec un thermomètre","avec un ampèremètre"],"V(caillou) = V(eau + caillou) − V(eau seule)."],
+["Une éprouvette contient 60 mL d'eau. Avec un caillou, le niveau monte à 75 mL. Le volume du caillou est :",["15 mL","75 mL","135 mL","60 mL"],"V = 75 − 60 = 15 mL = 15 cm³."],
+["Le volume d'un cube de 2 cm de côté est :",["8 cm³","4 cm³","6 cm³","2 cm³"],"V = a × a × a = 2 × 2 × 2 = 8 cm³."]]},
+{sem:0,name:"Masse d'un liquide et d'un solide",qs:[
+["L'unité internationale de la masse est :",["le kilogramme (kg)","le litre (L)","le newton (N)","le mètre cube (m³)"],"Le gramme est un sous-multiple : 1 kg = 1000 g."],
+["On mesure la masse avec :",["une balance","une éprouvette graduée","un thermomètre","une règle"],"La balance mesure la masse ; l'éprouvette mesure le volume."],
+["1,5 kg correspondent à :",["1500 g","150 g","15 g","15 000 g"],"1 kg = 1000 g, donc 1,5 kg = 1500 g."],
+["Pour mesurer la masse d'un liquide, on :",["pèse le récipient vide, puis plein, et on fait la différence","verse le liquide directement sur le plateau","utilise une éprouvette seule","mesure sa température"],"m(liquide) = m(récipient plein) − m(récipient vide)."],
+["Un bécher vide pèse 80 g. Rempli d'eau, il pèse 230 g. La masse de l'eau est :",["150 g","310 g","230 g","80 g"],"m = 230 − 80 = 150 g."],
+["Le bouton « tare » d'une balance électronique sert à :",["remettre l'affichage à zéro avec le récipient posé","mesurer le volume","augmenter la masse","éteindre la balance"],"La balance affiche ensuite directement la masse du contenu."],
+["La masse d'un objet :",["ne dépend pas de sa forme","change quand on le coupe en morceaux et qu'on garde tous les morceaux","change avec la couleur","dépend du récipient"],"La masse représente la quantité de matière : elle se conserve si rien n'est enlevé."]]},
+{sem:0,name:"La masse volumique",qs:[
+["La masse volumique ρ se calcule par :",["ρ = m / V","ρ = m × V","ρ = V / m","ρ = m + V"],"La masse volumique est la masse d'une unité de volume : ρ = m / V."],
+["La masse volumique de l'eau est :",["1 g/cm³","10 g/cm³","0,1 g/cm³","100 g/cm³"],"ρ(eau) = 1 g/cm³ = 1000 kg/m³."],
+["Un objet de 54 g a un volume de 20 cm³. Sa masse volumique est :",["2,7 g/cm³","1080 g/cm³","0,37 g/cm³","34 g/cm³"],"ρ = 54 / 20 = 2,7 g/cm³ (c'est l'aluminium)."],
+["1 g/cm³ est égal à :",["1000 kg/m³","1 kg/m³","100 kg/m³","10 kg/m³"],"1 g/cm³ = 1000 kg/m³."],
+["Un corps flotte sur l'eau si sa masse volumique est :",["inférieure à celle de l'eau","supérieure à celle de l'eau","égale à 10 g/cm³","toujours nulle"],"Un corps moins dense que l'eau flotte, comme le bois ou l'huile."],
+["L'huile flotte sur l'eau car :",["sa masse volumique est plus petite que celle de l'eau","elle est plus lourde que l'eau","elle est solide","elle est chaude"],"ρ(huile) ≈ 0,9 g/cm³, plus petite que ρ(eau) = 1 g/cm³."],
+["Un liquide a une masse volumique de 0,8 g/cm³. Quelle est la masse de 100 cm³ de ce liquide ?",["80 g","125 g","100 g","8 g"],"m = ρ × V = 0,8 × 100 = 80 g."]]},
+{sem:0,name:"La pression et la pression atmosphérique",qs:[
+["La pression d'un gaz se mesure avec :",["un manomètre","un thermomètre","un ampèremètre","une éprouvette"],"Le manomètre mesure la pression d'un gaz enfermé."],
+["L'unité internationale de pression est :",["le pascal (Pa)","le newton (N)","le kilogramme (kg)","le litre (L)"],"On utilise aussi le bar et l'hectopascal (hPa)."],
+["1 bar est égal à :",["100 000 Pa","1000 Pa","100 Pa","10 Pa"],"1 bar = 10⁵ Pa."],
+["Quand on comprime un gaz enfermé, sa pression :",["augmente","diminue","reste la même","devient nulle"],"Moins de volume pour la même quantité de gaz : la pression augmente."],
+["La pression atmosphérique se mesure avec :",["un baromètre","un manomètre de pneu","un thermomètre","une balance"],"Le baromètre mesure la pression de l'air qui nous entoure."],
+["La pression atmosphérique normale au niveau de la mer vaut environ :",["1013 hPa","13 hPa","101 300 hPa","1 hPa"],"1013 hPa = 101 300 Pa, soit environ 1 bar."],
+["Quand on monte en altitude, la pression atmosphérique :",["diminue","augmente","reste la même","devient très grande"],"Au sommet d'une montagne, il y a moins d'air au-dessus de nous."],
+["Un gaz est :",["compressible et expansible","incompressible","de forme propre","de volume propre"],"On peut comprimer un gaz (réduire son volume) ou le détendre."]]},
+{sem:0,name:"Le modèle particulaire de la matière",qs:[
+["Selon le modèle particulaire, la matière est formée :",["de très petites particules","d'un bloc continu","d'eau seulement","de lumière"],"Ces particules (molécules) sont trop petites pour être vues, même au microscope ordinaire."],
+["Dans un solide, les particules sont :",["proches les unes des autres et ordonnées","éloignées et en désordre","proches et très agitées en tous sens","absentes"],"C'est pour cela qu'un solide garde sa forme."],
+["Dans un liquide, les particules sont :",["proches les unes des autres et en désordre","éloignées et immobiles","ordonnées et fixes","très éloignées"],"Elles peuvent glisser les unes sur les autres : le liquide coule."],
+["Dans un gaz, les particules sont :",["éloignées les unes des autres et en désordre","collées et ordonnées","proches et immobiles","rangées en lignes"],"Il y a beaucoup d'espace vide entre les particules d'un gaz."],
+["On peut comprimer un gaz car :",["il y a beaucoup d'espace entre ses particules","ses particules rétrécissent","ses particules disparaissent","ses particules sont ordonnées"],"La compression rapproche les particules, sans changer leur taille ni leur nombre."],
+["Quand la température augmente, les particules :",["s'agitent plus","s'agitent moins","s'arrêtent","grossissent"],"La température est liée à l'agitation des particules."],
+["Lors d'un changement d'état, le nombre de particules :",["ne change pas","augmente","diminue","devient nul"],"Seule l'organisation des particules change : la masse se conserve."]]},
+{sem:0,name:"La chaleur et les changements d'état physique",qs:[
+["Le passage de l'état solide à l'état liquide s'appelle :",["la fusion","la solidification","la vaporisation","la liquéfaction"],"Solide → liquide : fusion. L'inverse est la solidification."],
+["Le passage de l'état liquide à l'état gazeux s'appelle :",["la vaporisation","la liquéfaction","la fusion","la solidification"],"Liquide → gaz : vaporisation (ébullition ou évaporation)."],
+["Le passage de l'état gazeux à l'état liquide s'appelle :",["la liquéfaction","la vaporisation","la fusion","la solidification"],"Gaz → liquide : liquéfaction, comme la buée sur une vitre froide."],
+["Pour faire fondre la glace, il faut :",["lui apporter de la chaleur","lui retirer de la chaleur","la mettre au congélateur","augmenter sa masse"],"La fusion et la vaporisation absorbent de la chaleur."],
+["La solidification de l'eau :",["libère de la chaleur","absorbe de la chaleur","ne fait aucun échange de chaleur","augmente la masse"],"La solidification et la liquéfaction cèdent de la chaleur au milieu extérieur."],
+["Pendant la fusion de la glace pure, la température :",["reste constante","augmente","diminue","varie au hasard"],"Pour un corps pur, la température reste constante (palier) pendant le changement d'état."],
+["Au cours d'un changement d'état, la masse :",["se conserve","augmente","diminue","devient nulle"],"La quantité de matière ne change pas, donc la masse se conserve."],
+["Quand l'eau se solidifie, son volume :",["augmente","diminue","reste le même","devient nul"],"La glace occupe plus de place que l'eau liquide : une bouteille pleine peut éclater au congélateur."],
+["La température se mesure avec :",["un thermomètre","un baromètre","une balance","un ampèremètre"],"Le thermomètre mesure la température en degrés Celsius (°C)."]]},
+{sem:0,name:"Les mélanges (homogènes et hétérogènes)",qs:[
+["Un mélange dont on distingue les constituants à l'œil nu est :",["hétérogène","homogène","un corps pur","une solution"],"Hétérogène : on voit plusieurs parties, comme l'eau boueuse."],
+["Un mélange homogène :",["a le même aspect en tout point","contient des grains visibles","se sépare toujours en deux couches","n'existe pas"],"On ne distingue pas ses constituants à l'œil nu."],
+["L'eau salée bien agitée est un mélange :",["homogène","hétérogène","solide","impossible"],"On ne distingue pas le sel dissous : le mélange est homogène."],
+["L'eau boueuse est un mélange :",["hétérogène","homogène","pur","gazeux"],"On voit des particules de terre en suspension."],
+["Le mélange eau + huile est :",["hétérogène","homogène","un corps pur","une solution"],"L'huile forme une couche séparée au-dessus de l'eau."],
+["L'eau minérale est :",["un mélange homogène","un corps pur","un mélange hétérogène","un gaz"],"Elle contient des sels minéraux dissous, invisibles à l'œil nu."],
+["Deux liquides qui se mélangent pour former un mélange homogène sont :",["miscibles","non miscibles","insolubles","solides"],"L'eau et l'alcool sont miscibles ; l'eau et l'huile ne le sont pas."]]},
+{sem:0,name:"La dissolution dans l'eau",qs:[
+["Dans l'eau sucrée, le sucre est :",["le soluté","le solvant","le filtrat","le distillat"],"Le soluté est le corps dissous ; le solvant est celui qui dissout."],
+["Dans une solution aqueuse, le solvant est :",["l'eau","le sel","le sucre","l'air"],"« Aqueuse » veut dire que le solvant est l'eau."],
+["Un corps qui se dissout dans l'eau est dit :",["soluble","insoluble","miscible","saturé"],"Le sel et le sucre sont solubles dans l'eau ; le sable est insoluble."],
+["Lequel de ces corps est insoluble dans l'eau ?",["le sable","le sel","le sucre","le café soluble"],"Le sable reste au fond, même après agitation."],
+["Une solution saturée :",["ne peut plus dissoudre de soluté","ne contient aucun soluté","est très diluée","bout à 0 °C"],"Le soluté ajouté en plus ne se dissout plus et reste au fond."],
+["On dissout 10 g de sel dans 200 g d'eau. La masse de la solution est :",["210 g","200 g","190 g","20 g"],"Lors d'une dissolution, la masse se conserve : 200 + 10 = 210 g."],
+["Pour dissoudre plus vite du sucre dans l'eau, on peut :",["agiter et chauffer","refroidir l'eau","ajouter du sable","attendre sans bouger dans de l'eau glacée"],"L'agitation et la chaleur accélèrent la dissolution."]]},
+{sem:0,name:"Techniques de séparation des constituants d'un mélange",qs:[
+["La décantation consiste à :",["laisser reposer pour que les particules se déposent au fond","chauffer le mélange","ajouter du sel","agiter fortement"],"Au repos, les particules plus lourdes tombent au fond du récipient."],
+["La filtration permet de :",["retenir les particules solides d'un liquide","séparer le sel dissous de l'eau","mesurer une masse","dissoudre le sucre"],"Le filtre retient les particules ; le liquide qui passe s'appelle le filtrat."],
+["Le liquide recueilli après une filtration s'appelle :",["le filtrat","le distillat","le résidu","le soluté"],"Le solide retenu par le filtre s'appelle le résidu."],
+["Pour obtenir de l'eau pure à partir d'eau salée, on utilise :",["la distillation","la filtration","la décantation","l'agitation"],"La distillation vaporise l'eau puis la liquéfie : le sel reste dans le ballon."],
+["Pour séparer l'eau et l'huile, on utilise :",["une ampoule à décanter","un filtre en papier","un thermomètre","une balance"],"On ouvre le robinet pour faire couler l'eau, qui est en dessous."],
+["Le sel peut être récupéré à partir d'eau salée par :",["évaporation de l'eau","filtration","décantation","agitation"],"Dans les marais salants, l'eau s'évapore au soleil et le sel reste."],
+["La filtration de l'eau salée permet-elle de retirer le sel ?",["Non, le sel dissous passe à travers le filtre","Oui, le filtre retient le sel","Oui, si on filtre deux fois","Oui, si l'eau est froide"],"Le sel dissous fait partie du mélange homogène : il traverse le filtre."]]},
+{sem:0,name:"Le corps pur",qs:[
+["Un corps pur est formé :",["d'une seule substance","de plusieurs substances mélangées","toujours d'eau salée","de sable et d'eau"],"L'eau distillée est un corps pur ; l'eau minérale est un mélange."],
+["Lequel de ces liquides est un corps pur ?",["l'eau distillée","l'eau du robinet","l'eau de mer","le jus d'orange"],"L'eau distillée ne contient que de l'eau."],
+["Sous la pression normale, la glace pure fond à :",["0 °C","100 °C","−10 °C","4 °C"],"La température de fusion de l'eau pure est 0 °C."],
+["Sous la pression normale, l'eau pure bout à :",["100 °C","0 °C","50 °C","120 °C"],"La température d'ébullition de l'eau pure est 100 °C."],
+["Pendant l'ébullition de l'eau salée, la température :",["continue d'augmenter : il n'y a pas de vrai palier","reste exactement à 100 °C","diminue","reste à 0 °C"],"Un mélange n'a pas de palier net ; un corps pur en a un."],
+["Un corps pur peut être reconnu par :",["ses températures de changement d'état et sa masse volumique","sa forme","sa couleur seulement","son récipient"],"Ce sont des caractéristiques propres à chaque corps pur."],
+["Le sulfate de cuivre anhydre blanc, au contact de l'eau, devient :",["bleu","rouge","noir","jaune"],"C'est le test de reconnaissance de l'eau."]]},
+{sem:0,name:"Le traitement des eaux",qs:[
+["L'eau potable est :",["une eau que l'on peut boire sans danger","de l'eau pure","de l'eau distillée","de l'eau de mer"],"L'eau potable contient des sels minéraux mais aucun microbe ni substance dangereuse."],
+["Dans une station de traitement, le dégrillage sert à :",["retenir les gros déchets avec des grilles","tuer les microbes","ajouter des sels minéraux","chauffer l'eau"],"C'est la première étape : branches, plastiques et gros débris sont arrêtés."],
+["Les microbes de l'eau sont éliminés par :",["la désinfection (chlore ou ozone)","la décantation","le dégrillage","le tamisage"],"Le chlore ou l'ozone tuent les micro-organismes."],
+["Dans le traitement de l'eau, la décantation permet de :",["faire déposer les particules en suspension","tuer les microbes","dissoudre le sel","ajouter du chlore"],"On ajoute souvent un produit qui regroupe les petites particules pour qu'elles tombent plus vite."],
+["La filtration sur sable dans une station sert à :",["retenir les fines particules restantes","éliminer le sel","ajouter des microbes","chauffer l'eau"],"L'eau traverse des couches de sable qui retiennent les petites impuretés."],
+["Les eaux usées des maisons sont nettoyées dans :",["une station d'épuration","un barrage","une centrale électrique","un puits"],"La station d'épuration traite les eaux usées avant de les rejeter dans la nature."],
+["Pour économiser l'eau, il faut :",["fermer le robinet pendant qu'on se brosse les dents","laisser couler l'eau","laver la voiture tous les jours au tuyau","ignorer les fuites"],"L'eau potable est précieuse, surtout au Maroc où les ressources sont limitées."]]},
+{sem:1,name:"Le circuit électrique simple",qs:[
+["Un circuit électrique simple contient au moins :",["un générateur, un récepteur et des fils","une lampe seulement","deux interrupteurs","une pile seulement"],"Il faut un générateur (pile), un récepteur (lampe…) et des fils formant une boucle."],
+["Le courant circule quand le circuit est :",["fermé","ouvert","coupé","sans générateur"],"Le courant ne passe que dans une boucle fermée."],
+["Dans un circuit, la pile joue le rôle de :",["générateur","récepteur","interrupteur","isolant"],"Le générateur fournit l'énergie électrique au circuit."],
+["Lequel de ces éléments est un récepteur ?",["une lampe","une pile","un fil de connexion","un interrupteur"],"Un récepteur reçoit l'énergie électrique : lampe, moteur, sonnerie…"],
+["Quand l'interrupteur est ouvert :",["le courant ne circule pas","le courant circule plus fort","la lampe brille","la pile se recharge"],"Un interrupteur ouvert coupe la boucle."],
+["Une diode laisse passer le courant :",["dans un seul sens","dans les deux sens","jamais","seulement à la lumière"],"Dans le sens passant elle conduit ; dans le sens bloquant elle arrête le courant."],
+["Un schéma électrique utilise :",["des symboles normalisés","des dessins réalistes en couleur","des photos","des lettres seulement"],"Les symboles normalisés sont les mêmes dans le monde entier."]]},
+{sem:1,name:"Les types de montages (série et dérivation)",qs:[
+["Dans un montage en série, les dipôles forment :",["une seule boucle","plusieurs boucles","aucune boucle","deux générateurs"],"Tous les dipôles sont branchés les uns à la suite des autres."],
+["Dans un montage en série, si une lampe grille :",["les autres lampes s'éteignent","les autres brillent plus","rien ne change","la pile se recharge"],"En série, il n'y a qu'une boucle : elle est coupée partout."],
+["Dans un montage en dérivation, si une lampe grille :",["les autres lampes continuent de briller","toutes les lampes s'éteignent","la pile s'arrête","le circuit principal s'ouvre"],"Chaque branche forme sa propre boucle avec le générateur."],
+["Plus on ajoute de lampes en série :",["moins elles brillent","plus elles brillent","rien ne change","la pile s'arrête"],"En série, les lampes se partagent la tension du générateur."],
+["Les appareils d'une maison sont branchés :",["en dérivation","en série","sans fils","tous sur un seul interrupteur"],"En dérivation, chaque appareil fonctionne indépendamment des autres."],
+["Une lampe est court-circuitée quand :",["ses deux bornes sont reliées par un fil","on ajoute une pile","on ouvre l'interrupteur","on la dévisse"],"Le courant passe par le fil et plus par la lampe, qui s'éteint."],
+["Un point de branchement relié à au moins trois fils s'appelle :",["un nœud","une borne","un générateur","une branche"],"Les nœuds n'existent que dans les circuits en dérivation."]]},
+{sem:1,name:"Le courant électrique continu",qs:[
+["À l'extérieur de la pile, le courant circule :",["de la borne + vers la borne −","de la borne − vers la borne +","dans les deux sens","il ne circule pas"],"C'est le sens conventionnel du courant."],
+["L'intensité du courant se mesure avec :",["un ampèremètre","un voltmètre","un ohmmètre","un thermomètre"],"L'ampèremètre mesure l'intensité en ampères (A)."],
+["L'ampèremètre se branche :",["en série","en dérivation","sans fils","aux bornes de la pile seulement"],"Le courant doit traverser l'ampèremètre."],
+["L'unité de l'intensité du courant est :",["l'ampère (A)","le volt (V)","l'ohm (Ω)","le watt (W)"],"Le symbole de l'intensité est I."],
+["250 mA correspondent à :",["0,25 A","2,5 A","25 A","250 A"],"1 A = 1000 mA."],
+["Dans un circuit en série, l'intensité du courant :",["est la même en tout point","est plus grande près de la borne +","diminue après chaque lampe","est nulle"],"C'est la loi d'unicité de l'intensité dans un circuit série."],
+["Une pile délivre un courant :",["continu","alternatif","sinusoïdal","variable dans les deux sens"],"Le courant continu circule toujours dans le même sens."]]},
+{sem:1,name:"Conducteurs et isolants",qs:[
+["Lequel de ces matériaux est un conducteur ?",["le cuivre","le plastique","le verre","le bois sec"],"Les métaux comme le cuivre conduisent le courant électrique."],
+["Lequel de ces matériaux est un isolant ?",["le caoutchouc","le fer","l'aluminium","le cuivre"],"Le caoutchouc ne laisse pas passer le courant."],
+["Les fils électriques sont entourés de plastique car :",["le plastique est isolant et protège","le plastique conduit mieux","c'est plus joli seulement","le plastique produit le courant"],"La gaine isolante protège contre les contacts dangereux et les courts-circuits."],
+["Tous les métaux sont :",["conducteurs","isolants","transparents","magnétiques"],"Le fer, le cuivre, l'aluminium, l'or… conduisent le courant."],
+["Le corps humain est :",["conducteur","parfaitement isolant","un générateur","sans effet sur le courant"],"C'est pour cela que le courant du secteur est dangereux."],
+["L'eau salée est :",["conductrice","isolante","un générateur","un métal"],"Les ions dissous permettent au courant de passer."],
+["Pour tester si un matériau est conducteur, on le place :",["dans un circuit avec une lampe et on regarde si elle brille","dans l'eau","sur une balance","sous la lumière"],"Si la lampe s'allume, le matériau laisse passer le courant."]]},
+{sem:1,name:"Loi des nœuds",qs:[
+["La loi des nœuds dit que :",["la somme des intensités qui arrivent à un nœud est égale à la somme de celles qui en partent","toutes les intensités sont nulles","l'intensité double à chaque nœud","l'intensité dépend de la couleur des fils"],"Le courant se partage aux nœuds, sans se perdre."],
+["Un courant de 0,5 A arrive à un nœud et se partage en deux branches. Si I₁ = 0,2 A, alors I₂ =",["0,3 A","0,7 A","0,5 A","0,1 A"],"I₂ = 0,5 − 0,2 = 0,3 A."],
+["Dans la branche principale, I = 1,2 A. Les deux branches dérivées ont I₁ = 0,8 A et I₂ =",["0,4 A","2 A","1,2 A","0,8 A"],"I = I₁ + I₂, donc I₂ = 1,2 − 0,8 = 0,4 A."],
+["Deux lampes identiques en dérivation sont traversées par 0,3 A chacune. L'intensité dans la branche principale est :",["0,6 A","0,3 A","0,15 A","0,9 A"],"I = 0,3 + 0,3 = 0,6 A."],
+["La loi des nœuds s'applique aux circuits :",["en dérivation","en série seulement","sans générateur","ouverts"],"Il n'y a des nœuds que dans les circuits en dérivation."],
+["Dans un montage en dérivation, l'intensité dans la branche principale est :",["égale à la somme des intensités des branches dérivées","plus petite que chaque branche","toujours nulle","égale à l'intensité d'une seule branche"],"I = I₁ + I₂ + …"]]},
+{sem:1,name:"La tension électrique",qs:[
+["La tension électrique se mesure avec :",["un voltmètre","un ampèremètre","un ohmmètre","un dynamomètre"],"La tension s'exprime en volts (V)."],
+["Le voltmètre se branche :",["en dérivation aux bornes du dipôle","en série","sans fils","dans l'interrupteur"],"On mesure la tension entre deux points du circuit."],
+["L'unité de la tension est :",["le volt (V)","l'ampère (A)","l'ohm (Ω)","le joule (J)"],"La tension est notée U."],
+["La tension aux bornes d'un fil de connexion est :",["pratiquement nulle","égale à celle de la pile","très grande","négative"],"Un fil ne consomme presque pas d'énergie."],
+["Une lampe porte l'indication 6 V. C'est sa tension :",["nominale (de fonctionnement normal)","maximale de la pile","minimale","d'isolation"],"Sous 6 V, la lampe brille normalement. Au-dessus, elle risque de griller."],
+["La tension aux bornes d'une pile non branchée (circuit ouvert) :",["existe quand même","est toujours nulle","devient infinie","dépend de la lampe"],"La pile a une tension même quand aucun courant ne circule."],
+["Une lampe de 3,5 V branchée sur une pile de 9 V :",["risque de griller","brille faiblement","ne s'allume pas","fonctionne normalement"],"La tension appliquée est bien supérieure à sa tension nominale."]]},
+{sem:1,name:"Loi des tensions",qs:[
+["Dans un circuit en série, la tension du générateur est égale :",["à la somme des tensions aux bornes des récepteurs","à la tension d'un seul récepteur","à zéro","au double de chaque tension"],"C'est la loi d'additivité des tensions : U = U₁ + U₂."],
+["Une pile de 9 V alimente deux lampes en série. U₁ = 5 V. Alors U₂ =",["4 V","9 V","14 V","5 V"],"U₂ = 9 − 5 = 4 V."],
+["Dans un montage en dérivation, les tensions aux bornes des branches sont :",["égales","additionnées","nulles","toujours différentes"],"C'est la loi d'unicité des tensions : U = U₁ = U₂."],
+["Deux lampes en dérivation sont branchées sur une pile de 4,5 V. La tension aux bornes de chaque lampe est :",["4,5 V","2,25 V","9 V","0 V"],"En dérivation, chaque branche reçoit la tension du générateur."],
+["Trois lampes identiques en série sur 12 V. La tension aux bornes de chacune est :",["4 V","12 V","36 V","3 V"],"12 / 3 = 4 V pour chaque lampe identique."],
+["Un circuit série contient une pile de 6 V et un interrupteur ouvert. La tension aux bornes de l'interrupteur ouvert est :",["6 V","0 V","3 V","12 V"],"Aucun courant ne passe : toute la tension se retrouve aux bornes de l'interrupteur ouvert."]]},
+{sem:1,name:"La résistance électrique",qs:[
+["L'unité de la résistance électrique est :",["l'ohm (Ω)","le volt (V)","l'ampère (A)","le watt (W)"],"La résistance est notée R."],
+["La résistance se mesure avec :",["un ohmmètre","un ampèremètre","un voltmètre","un manomètre"],"On mesure la résistance hors du circuit, sans générateur."],
+["Quand on ajoute une résistance en série dans un circuit, l'intensité :",["diminue","augmente","reste la même","devient infinie"],"Une résistance s'oppose au passage du courant."],
+["Plus la résistance d'un circuit série est grande :",["plus l'intensité est petite","plus l'intensité est grande","plus la lampe brille","plus la pile est puissante"],"La résistance limite le courant."],
+["1 kΩ est égal à :",["1000 Ω","100 Ω","10 Ω","1 000 000 Ω"],"k = kilo = 1000."],
+["Un conducteur ohmique est un dipôle qui :",["limite l'intensité du courant","produit du courant","mesure la tension","laisse passer le courant dans un seul sens"],"On l'utilise souvent pour protéger une diode ou une DEL."],
+["La place d'une résistance dans un circuit série :",["ne change pas son effet","change complètement l'intensité","doit toujours être près de la borne +","doit toujours être près de la borne −"],"En série, l'intensité est la même partout, quelle que soit la place de la résistance."]]},
+{sem:1,name:"Prévention contre les dangers du courant électrique",qs:[
+["Le court-circuit d'une pile est dangereux car :",["la pile chauffe et peut provoquer un incendie","la lampe brille trop","le courant s'arrête","il n'y a aucun danger"],"Un courant très fort traverse les fils et la pile, qui s'échauffent."],
+["Toucher un appareil électrique avec les mains mouillées est :",["dangereux","sans danger","recommandé","utile"],"L'eau rend le corps plus conducteur : risque d'électrocution."],
+["Le fusible et le disjoncteur servent à :",["couper le courant en cas de surintensité","augmenter la tension","produire du courant","éclairer la maison"],"Ils protègent l'installation contre les courts-circuits et les surcharges."],
+["Le fil le plus dangereux de l'installation domestique est :",["le fil de phase","le fil neutre","le fil de terre","la gaine en plastique"],"La phase est à 220 V par rapport à la terre."],
+["Le fil de terre (vert-jaune) sert à :",["protéger les personnes contre l'électrocution","augmenter la puissance","allumer les lampes","mesurer la tension"],"Il évacue vers le sol le courant d'un appareil défectueux."],
+["Brancher beaucoup d'appareils sur une seule prise multiple :",["peut provoquer une surchauffe","est sans risque","diminue la consommation","protège l'installation"],"L'intensité devient trop grande dans les fils."],
+["Avant de changer une ampoule, il faut :",["couper le courant","laisser l'interrupteur allumé","mouiller ses mains","toucher les fils dénudés"],"On travaille toujours hors tension."]]}
+]},
+"2AC":{color:"var(--c2)",sub:"2ème année",sems:["Matière et environnement","Lumière et électricité"],chapters:[
+{sem:0,name:"L'air qui nous entoure",qs:[
+["La couche d'air qui entoure la Terre s'appelle :",["l'atmosphère","l'hydrosphère","la lithosphère","la stratosphère seulement"],"L'atmosphère est formée de plusieurs couches."],
+["La couche de l'atmosphère où nous vivons est :",["la troposphère","la stratosphère","la thermosphère","la mésosphère"],"C'est la couche la plus proche du sol, où se forment les nuages."],
+["L'air est indispensable :",["à la respiration des êtres vivants","seulement aux plantes","à rien","seulement aux machines"],"Les êtres vivants utilisent le dioxygène de l'air."],
+["L'air est :",["une matière : il a une masse et occupe un volume","du vide","une énergie","un solide"],"On peut peser de l'air et le comprimer."],
+["L'air est :",["un mélange de gaz","un corps pur","un liquide","un seul gaz"],"Il contient du diazote, du dioxygène et d'autres gaz."],
+["La couche d'ozone, située dans la stratosphère, nous protège :",["des rayons ultraviolets du Soleil","du froid","de la pluie","du bruit"],"Les UV en excès sont dangereux pour la peau et les yeux."],
+["Plus on s'élève en altitude, plus l'air est :",["rare (moins dense)","dense","chaud","lourd"],"C'est pourquoi les alpinistes emportent parfois du dioxygène."]]},
+{sem:0,name:"Propriétés de l'air et ses constituants",qs:[
+["L'air est composé d'environ :",["78 % de diazote et 21 % de dioxygène","50 % de diazote et 50 % de dioxygène","100 % de dioxygène","21 % de diazote et 78 % de dioxygène"],"Le diazote est majoritaire ; le dioxygène représente environ 1/5 de l'air."],
+["Le gaz de l'air nécessaire à la respiration et aux combustions est :",["le dioxygène","le diazote","le dioxyde de carbone","l'hélium"],"Le dioxygène O₂ entretient la respiration et les combustions."],
+["Un litre d'air a une masse d'environ :",["1,3 g","13 g","130 g","0 g"],"L'air est pesant : environ 1,3 g par litre."],
+["L'air est :",["compressible et expansible","incompressible","de forme propre","de volume propre"],"On peut comprimer de l'air dans une seringue bouchée."],
+["Le dioxygène se reconnaît car il :",["rallume une bûchette incandescente","trouble l'eau de chaux","éteint une flamme","bleuit le sulfate de cuivre"],"C'est le test du dioxygène."],
+["Le dioxyde de carbone se reconnaît car il :",["trouble l'eau de chaux","rallume une bûchette","produit une détonation","colore l'eau en rouge"],"L'eau de chaux devient blanche et trouble."],
+["Quand on comprime de l'air dans une seringue bouchée, sa pression :",["augmente","diminue","reste la même","devient nulle"],"Les molécules sont plus serrées et frappent plus souvent les parois."]]},
+{sem:0,name:"Les molécules et les atomes",qs:[
+["Le symbole de l'atome de carbone est :",["C","Ca","Co","Cr"],"Ca est le calcium, Co le cobalt, Cr le chrome."],
+["Le symbole de l'atome d'oxygène est :",["O","Ox","Og","Os"],"Le symbole d'un atome est une lettre majuscule, parfois suivie d'une minuscule."],
+["Le symbole de l'atome d'hydrogène est :",["H","Hy","He","Hg"],"He est l'hélium et Hg le mercure."],
+["Une molécule est :",["un assemblage d'atomes liés entre eux","un atome isolé","un mélange de gaz","une particule de lumière"],"Par exemple, la molécule d'eau est formée de 3 atomes."],
+["La formule de la molécule d'eau est :",["H₂O","HO₂","H₂O₂","OH"],"Deux atomes d'hydrogène et un atome d'oxygène."],
+["La formule du dioxyde de carbone est :",["CO₂","CO","C₂O","C₂O₂"],"Un atome de carbone et deux atomes d'oxygène."],
+["La molécule de dioxygène O₂ contient :",["2 atomes d'oxygène","1 atome d'oxygène","2 molécules","3 atomes d'oxygène"],"L'indice 2 indique deux atomes."],
+["La molécule de butane C₄H₁₀ contient :",["4 atomes de carbone et 10 atomes d'hydrogène","10 atomes de carbone et 4 d'hydrogène","14 atomes de carbone","4 molécules"],"L'indice indique le nombre d'atomes de l'élément qui le précède."],
+["Combien d'atomes d'hydrogène y a-t-il dans 2 H₂O ?",["4","2","3","6"],"2 molécules × 2 atomes d'hydrogène = 4."]]},
+{sem:0,name:"Les combustions",qs:[
+["Une combustion nécessite :",["un combustible, un comburant et une source de chaleur","seulement un combustible","de l'eau","du diazote"],"C'est le triangle du feu. Si l'un manque, le feu s'éteint."],
+["Le comburant de la plupart des combustions est :",["le dioxygène","le carbone","le butane","le diazote"],"Le dioxygène de l'air est le comburant ; le carbone et le butane sont des combustibles."],
+["La combustion du carbone dans le dioxygène produit :",["du dioxyde de carbone","de l'eau","du dioxygène","du soufre"],"C + O₂ → CO₂."],
+["La combustion complète du butane produit :",["du dioxyde de carbone et de l'eau","du carbone seulement","du monoxyde de carbone seulement","du diazote"],"Le butane contient du carbone et de l'hydrogène : il donne CO₂ et H₂O."],
+["Une combustion incomplète peut produire un gaz mortel :",["le monoxyde de carbone (CO)","le dioxygène","la vapeur d'eau","le diazote"],"Le CO est inodore et toxique : il faut aérer les pièces où l'on utilise le gaz."],
+["Une flamme jaune qui noircit les récipients indique une combustion :",["incomplète","complète","sans combustible","sans chaleur"],"Le noir est du carbone non brûlé, signe d'un manque de dioxygène."],
+["Une flamme bleue du butane indique une combustion :",["complète","incomplète","impossible","sans dioxygène"],"Quand le dioxygène est suffisant, la flamme est bleue et ne noircit pas."],
+["Pour éteindre un feu, on peut :",["supprimer le comburant en couvrant le feu","ajouter du combustible","souffler du dioxygène","chauffer davantage"],"Couvrir le feu (couverture, sable) le prive de dioxygène."]]},
+{sem:0,name:"La réaction chimique (notion)",qs:[
+["Au cours d'une réaction chimique :",["des réactifs disparaissent et des produits apparaissent","rien ne change","seul l'état physique change","la masse totale augmente"],"De nouvelles substances se forment : c'est une transformation chimique."],
+["Dans la combustion du carbone, les réactifs sont :",["le carbone et le dioxygène","le dioxyde de carbone","l'eau","le diazote"],"Le produit est le dioxyde de carbone."],
+["Laquelle de ces transformations est chimique ?",["la combustion du bois","la fusion de la glace","la dissolution du sucre","l'évaporation de l'eau"],"La combustion forme de nouvelles substances ; les autres sont des transformations physiques."],
+["Laquelle de ces transformations est physique ?",["la fusion de la glace","la combustion du butane","la rouille du fer","la cuisson d'un œuf"],"La glace et l'eau liquide sont la même substance."],
+["Un signe qui peut indiquer une réaction chimique est :",["l'apparition d'un gaz ou un changement de couleur","un simple changement de forme","un changement de récipient","une agitation"],"Dégagement de gaz, changement de couleur, chaleur : signes d'une réaction."],
+["On écrit une réaction chimique sous la forme :",["réactifs → produits","produits → réactifs","réactifs = produits","produits + réactifs = 0"],"La flèche se lit « donnent »."]]},
+{sem:0,name:"Les lois de la réaction chimique",qs:[
+["Selon la loi de Lavoisier, au cours d'une réaction chimique, la masse totale :",["se conserve","augmente","diminue","double"],"« Rien ne se perd, rien ne se crée, tout se transforme. »"],
+["Au cours d'une réaction chimique, les atomes :",["se conservent : ils se réarrangent","disparaissent","se transforment en d'autres atomes","se multiplient"],"Le nombre et le type d'atomes sont les mêmes avant et après."],
+["Quelle équation est équilibrée ?",["C + O₂ → CO₂","C + O₂ → CO","H₂ + O₂ → H₂O","CH₄ + O₂ → CO₂ + H₂O"],"Dans C + O₂ → CO₂, il y a 1 C et 2 O de chaque côté."],
+["L'équation équilibrée de la formation de l'eau est :",["2 H₂ + O₂ → 2 H₂O","H₂ + O₂ → H₂O","H₂ + O → H₂O₂","2 H + O₂ → H₂O"],"À gauche : 4 H et 2 O ; à droite : 4 H et 2 O."],
+["12 g de carbone réagissent avec 32 g de dioxygène. La masse de dioxyde de carbone formé est :",["44 g","20 g","32 g","12 g"],"Conservation de la masse : 12 + 32 = 44 g."],
+["Dans CH₄ + 2 O₂ → CO₂ + 2 H₂O, le nombre d'atomes d'oxygène de chaque côté est :",["4","2","3","6"],"À gauche 2 × 2 = 4 ; à droite 2 + 2 × 1 = 4."]]},
+{sem:0,name:"Les substances naturelles et synthétiques",qs:[
+["Une substance naturelle :",["existe dans la nature","est toujours fabriquée en usine","n'existe pas","est toujours toxique"],"Exemples : le coton, la laine, le sel, le bois."],
+["Une substance synthétique :",["est fabriquée par l'homme à l'aide de réactions chimiques","existe toujours dans la nature","est toujours un métal","ne peut pas être utilisée"],"Exemples : le nylon, les plastiques, de nombreux médicaments."],
+["Lequel de ces matériaux est synthétique ?",["le nylon","le coton","la laine","le bois"],"Le nylon est fabriqué à partir du pétrole."],
+["Lequel de ces matériaux est naturel ?",["la laine","le polyester","le PVC","le nylon"],"La laine provient des moutons."],
+["Une substance synthétique peut-elle être identique à une substance naturelle ?",["Oui, elle peut avoir la même formule et les mêmes propriétés","Non, jamais","Seulement si elle est solide","Seulement si elle est colorée"],"Par exemple, la vanilline de synthèse est la même molécule que celle de la vanille."],
+["Fabriquer une substance par réaction chimique s'appelle :",["une synthèse","une distillation","une filtration","une fusion"],"La synthèse permet de produire en grande quantité et à moindre coût."]]},
+{sem:0,name:"La pollution de l'air",qs:[
+["Une grande source de pollution de l'air en ville est :",["les gaz d'échappement des véhicules","les arbres","la pluie","les océans"],"Les moteurs rejettent CO, CO₂, oxydes d'azote et particules."],
+["Un gaz qui renforce l'effet de serre est :",["le dioxyde de carbone","le dioxygène","le diazote","l'argon"],"Les combustions rejettent du CO₂, principal gaz à effet de serre lié à l'activité humaine."],
+["Les pluies acides sont surtout causées par :",["le dioxyde de soufre et les oxydes d'azote","le dioxygène","la vapeur d'eau pure","le diazote de l'air"],"Ces gaz réagissent avec l'eau de l'atmosphère pour former des acides."],
+["Les CFC (anciens gaz des réfrigérateurs) détruisent :",["la couche d'ozone","les nuages","le diazote","les océans"],"C'est pourquoi ils ont été interdits."],
+["Pour réduire la pollution de l'air, on peut :",["utiliser les transports en commun et les énergies renouvelables","brûler les déchets plastiques","rouler davantage en voiture","couper les arbres"],"Moins de combustions = moins de polluants."],
+["Les fines particules de fumée peuvent provoquer :",["des maladies respiratoires","une meilleure respiration","une baisse de la pollution","rien du tout"],"Elles pénètrent profondément dans les poumons."],
+["Le pot catalytique des voitures sert à :",["transformer une partie des gaz polluants en gaz moins nocifs","augmenter la vitesse","produire de l'essence","refroidir le moteur"],"Il transforme par exemple le CO en CO₂."]]},
+{sem:1,name:"Sources et récepteurs de la lumière",qs:[
+["Une source primaire de lumière :",["produit sa propre lumière, comme le Soleil","renvoie la lumière reçue, comme la Lune","absorbe toute la lumière","n'est jamais visible"],"Une lampe allumée et une bougie sont aussi des sources primaires."],
+["La Lune est :",["un objet diffusant (source secondaire)","une source primaire","une étoile","un récepteur seulement"],"La Lune renvoie la lumière du Soleil."],
+["Lequel de ces objets est une source primaire ?",["une bougie allumée","un miroir","la Lune","un livre éclairé"],"La flamme produit sa propre lumière."],
+["Pour voir un objet, il faut que :",["de la lumière venant de l'objet entre dans notre œil","notre œil envoie de la lumière vers l'objet","l'objet soit noir","il fasse nuit"],"L'œil est un récepteur de lumière."],
+["Lequel de ces objets est un récepteur de lumière ?",["un panneau solaire","une lampe torche","le Soleil","une bougie"],"Le panneau solaire transforme la lumière reçue en électricité."],
+["Un objet éclairé qui renvoie la lumière dans toutes les directions est :",["un objet diffusant","une source primaire","un objet opaque qui absorbe tout","un récepteur"],"C'est grâce à la diffusion que l'on voit les objets éclairés."]]},
+{sem:1,name:"La lumière et les couleurs",qs:[
+["La décomposition de la lumière blanche par un prisme s'appelle :",["la dispersion","la réflexion","l'absorption","la diffusion"],"On obtient le spectre de la lumière blanche."],
+["La lumière blanche est :",["un mélange de lumières colorées","une seule couleur","sans couleur et indécomposable","de la lumière noire"],"Le prisme la sépare en couleurs du rouge au violet."],
+["Un arc-en-ciel est dû :",["à la dispersion de la lumière du Soleil par les gouttes de pluie","à la pollution","à la Lune","aux nuages noirs"],"Chaque goutte agit comme un petit prisme."],
+["Un filtre rouge éclairé en lumière blanche laisse passer :",["la lumière rouge","la lumière verte","toutes les couleurs","aucune lumière"],"Le filtre absorbe les autres couleurs."],
+["Un objet blanc éclairé en lumière blanche :",["diffuse toutes les couleurs","absorbe toutes les couleurs","diffuse seulement le rouge","produit sa propre lumière"],"C'est pour cela qu'il paraît blanc."],
+["Un objet noir :",["absorbe toutes les couleurs","diffuse toutes les couleurs","produit de la lumière","ne reçoit aucune lumière"],"Il ne renvoie presque aucune lumière."],
+["Un objet vert éclairé en lumière rouge paraît :",["noir","vert","rouge","blanc"],"Il absorbe le rouge et ne reçoit pas de vert à renvoyer."]]},
+{sem:1,name:"La propagation de la lumière",qs:[
+["Dans un milieu transparent et homogène, la lumière se propage :",["en ligne droite","en zigzag","en cercle","elle ne se propage pas"],"C'est la propagation rectiligne de la lumière."],
+["La vitesse de la lumière dans le vide est d'environ :",["300 000 km/s","300 km/s","340 m/s","3 000 km/h"],"340 m/s est la vitesse du son dans l'air."],
+["Un rayon lumineux se représente par :",["une droite avec une flèche indiquant le sens","un cercle","un point","une courbe sans flèche"],"La flèche indique le sens de propagation."],
+["Le verre dépoli est un milieu :",["translucide","opaque","transparent","noir"],"Il laisse passer la lumière, mais on ne voit pas nettement à travers."],
+["Un mur en béton est un milieu :",["opaque","transparent","translucide","lumineux"],"Il ne laisse pas passer la lumière."],
+["La lumière peut-elle se propager dans le vide ?",["Oui","Non","Seulement la nuit","Seulement dans l'eau"],"La lumière du Soleil traverse le vide de l'espace pour arriver jusqu'à nous."],
+["Une année-lumière est :",["une distance","une durée","une vitesse","une couleur"],"C'est la distance parcourue par la lumière en un an."]]},
+{sem:1,name:"Applications de la propagation rectiligne",qs:[
+["L'ombre propre d'un objet est :",["sa partie non éclairée","la zone sombre sur l'écran","la source de lumière","la pénombre"],"La zone sombre sur l'écran s'appelle l'ombre portée."],
+["Une source de lumière étendue donne autour de l'ombre portée :",["une pénombre","une deuxième source","un arc-en-ciel","rien"],"La pénombre est une zone partiellement éclairée."],
+["Une éclipse de Lune se produit quand :",["la Lune passe dans l'ombre de la Terre","la Lune passe entre le Soleil et la Terre","le Soleil s'éteint","la Terre s'arrête de tourner"],"L'ordre est alors Soleil – Terre – Lune, alignés."],
+["Lors d'une éclipse de Soleil, l'ordre d'alignement est :",["Soleil – Lune – Terre","Soleil – Terre – Lune","Lune – Soleil – Terre","Terre – Soleil – Lune"],"La Lune cache le Soleil pour un observateur sur Terre."],
+["Les phases de la Lune s'expliquent par :",["la partie éclairée de la Lune que l'on voit depuis la Terre","l'ombre de la Terre chaque soir","les nuages","la Lune qui s'allume et s'éteint"],"La Lune tourne autour de la Terre : on voit plus ou moins sa face éclairée."],
+["Dans une chambre noire, l'image d'un objet est :",["renversée","droite et plus grande toujours","colorée en noir","invisible"],"Les rayons se croisent au niveau du petit trou."],
+["Si on éloigne l'écran d'une chambre noire du trou, l'image devient :",["plus grande","plus petite","droite","invisible"],"La taille de l'image augmente avec la distance trou-écran."]]},
+{sem:1,name:"Les lentilles minces",qs:[
+["Une lentille convergente a :",["des bords minces et un centre épais","des bords épais et un centre mince","des faces planes","une couleur noire"],"Les lentilles divergentes ont des bords épais."],
+["Les rayons parallèles à l'axe optique, après une lentille convergente :",["passent par le foyer image","s'écartent","restent parallèles","s'arrêtent"],"Ce point est le foyer image F'."],
+["La distance entre le centre optique et le foyer s'appelle :",["la distance focale f","la vergence","l'axe optique","le diamètre"],"Elle s'exprime en mètres."],
+["La vergence C d'une lentille s'exprime en :",["dioptries (δ)","mètres (m)","watts (W)","newtons (N)"],"C = 1 / f, avec f en mètres."],
+["Une lentille a une distance focale f = 0,25 m. Sa vergence est :",["4 δ","0,25 δ","25 δ","2,5 δ"],"C = 1 / 0,25 = 4 δ."],
+["Un rayon qui passe par le centre optique d'une lentille :",["n'est pas dévié","est renvoyé en arrière","passe par le foyer","s'arrête"],"C'est une des règles de construction des images."],
+["Plus une lentille convergente est bombée, plus sa distance focale est :",["petite","grande","nulle","négative"],"Elle est plus convergente : sa vergence est plus grande."]]},
+{sem:1,name:"Images données par une lentille convergente",qs:[
+["Un objet très éloigné (comme le Soleil) donne une image située :",["au foyer image","sur la lentille","à l'infini","devant la lentille"],"C'est pourquoi une loupe peut concentrer la lumière du Soleil en un point."],
+["Une image que l'on peut recueillir sur un écran est :",["réelle","virtuelle","toujours droite","impossible"],"Une image virtuelle ne peut pas être obtenue sur un écran."],
+["Un objet placé loin de la lentille (à plus de 2f) donne une image :",["réelle, renversée et plus petite","virtuelle et droite","réelle, droite et plus grande","inexistante"],"C'est le cas de l'appareil photo."],
+["Un objet placé entre le foyer et la lentille donne une image :",["virtuelle, droite et agrandie","réelle et renversée","sur un écran","plus petite et renversée"],"C'est le principe de la loupe."],
+["Un objet placé au foyer objet donne une image :",["à l'infini","au foyer image","sur la lentille","de même taille"],"Les rayons sortent parallèles."],
+["Pour tracer l'image d'un point, on utilise par exemple le rayon :",["qui passe par le centre optique et n'est pas dévié","qui revient vers la source","qui passe toujours par l'objet","qui est toujours vertical"],"On utilise aussi le rayon parallèle à l'axe, qui ressort par le foyer image."]]},
+{sem:1,name:"Les instruments optiques",qs:[
+["Une loupe est :",["une lentille convergente","une lentille divergente","un miroir","un prisme"],"On place l'objet entre le foyer et la lentille pour l'agrandir."],
+["Dans l'œil, le cristallin joue le rôle :",["d'une lentille convergente","d'un écran","d'un diaphragme","d'un filtre"],"La rétine joue le rôle de l'écran."],
+["Dans l'œil, l'image se forme sur :",["la rétine","la pupille","l'iris","la cornée seulement"],"La rétine transforme la lumière en signaux envoyés au cerveau."],
+["L'œil myope se corrige avec :",["une lentille divergente","une lentille convergente","un prisme","un filtre rouge"],"L'œil myope est trop convergent."],
+["L'œil hypermétrope se corrige avec :",["une lentille convergente","une lentille divergente","un miroir","un filtre"],"L'œil hypermétrope n'est pas assez convergent."],
+["Dans un appareil photo, l'objectif est :",["une lentille convergente (ou un ensemble de lentilles)","un écran","une pile","un miroir plan"],"Le capteur (ou la pellicule) joue le rôle de l'écran."],
+["L'image formée sur la rétine est :",["réelle et renversée","virtuelle et droite","toujours plus grande que l'objet","colorée en rouge"],"C'est le cerveau qui la remet à l'endroit."]]},
+{sem:1,name:"Le courant alternatif sinusoïdal",qs:[
+["Le courant fourni par le secteur est :",["alternatif","continu","produit par une pile","toujours nul"],"Il change de sens régulièrement."],
+["La période T d'une tension alternative s'exprime en :",["secondes (s)","hertz (Hz)","volts (V)","ampères (A)"],"C'est la durée d'un motif qui se répète."],
+["La fréquence f d'une tension alternative s'exprime en :",["hertz (Hz)","secondes (s)","volts (V)","ohms (Ω)"],"f = 1 / T."],
+["Au Maroc, la tension du secteur a pour valeurs :",["220 V et 50 Hz","12 V et 50 Hz","220 V et 100 Hz","110 V et 60 Hz"],"220 V est la tension efficace, 50 Hz la fréquence."],
+["Si f = 50 Hz, la période vaut :",["0,02 s","50 s","0,5 s","2 s"],"T = 1 / f = 1 / 50 = 0,02 s."],
+["Un voltmètre en mode alternatif (AC) mesure :",["la tension efficace","la tension maximale","la période","la fréquence"],"Ueff = Umax / √2."],
+["Si Umax = 311 V, la tension efficace vaut environ :",["220 V","311 V","440 V","155 V"],"Ueff = 311 / √2 ≈ 220 V."],
+["Pour visualiser une tension alternative, on utilise :",["un oscilloscope","un ampèremètre","une balance","un thermomètre"],"L'oscilloscope affiche la courbe sinusoïdale de la tension."]]},
+{sem:1,name:"L'installation électrique domestique",qs:[
+["L'installation domestique est alimentée par deux fils :",["la phase et le neutre","deux fils de terre","deux fils de phase","le neutre et la terre seulement"],"La tension entre la phase et le neutre est de 220 V."],
+["Le fil de phase est :",["dangereux à toucher","sans danger","le fil vert-jaune","toujours isolé du réseau"],"La phase est à 220 V par rapport à la terre."],
+["Les appareils d'une maison sont branchés :",["en dérivation","en série","sur un seul fil","sans interrupteur"],"Ils reçoivent tous 220 V et fonctionnent indépendamment."],
+["Le compteur électrique mesure :",["l'énergie consommée","la tension","la résistance","la masse"],"La facture est calculée à partir de l'énergie consommée en kWh."],
+["Le disjoncteur différentiel protège :",["les personnes contre les fuites de courant","contre la lumière","contre l'eau","la facture"],"Il coupe le courant en cas de fuite vers la terre."],
+["Le fusible fond quand :",["l'intensité devient trop grande","la tension baisse","on éteint la lumière","il fait froid"],"Il ouvre alors le circuit pour le protéger."],
+["L'interrupteur d'une lampe doit être placé sur :",["le fil de phase","le fil neutre","le fil de terre","aucun fil"],"Ainsi, la lampe n'est plus sous tension quand l'interrupteur est ouvert."]]}
+]},
+"3AC":{color:"var(--c3)",sub:"3ème année",sems:["Chimie : la matière","Mécanique et électricité"],chapters:[
+{sem:0,name:"Quelques matériaux utilisés au quotidien",qs:[
+["Les trois grandes familles de matériaux sont :",["les métaux, les matières plastiques et le verre","l'eau, l'air et le feu","les acides, les bases et le sel","le bois, l'eau et le gaz"],"On classe les matériaux selon leurs propriétés."],
+["Parmi ces métaux, lequel est attiré par un aimant ?",["le fer","le cuivre","l'aluminium","le zinc"],"L'aimant permet de reconnaître le fer (et l'acier)."],
+["Le cuivre se reconnaît à :",["sa couleur rouge-orangé","sa couleur grise","sa transparence","son attraction par un aimant"],"C'est le seul métal courant de cette couleur."],
+["L'aluminium se reconnaît car il est :",["gris et très léger","rouge","attiré par un aimant","transparent"],"Sa masse volumique est de 2,7 g/cm³, bien inférieure à celle du fer (7,8 g/cm³)."],
+["Les métaux conduisent :",["le courant électrique et la chaleur","seulement la lumière","aucun courant","seulement le son"],"C'est pour cela que les fils électriques et les casseroles sont en métal."],
+["Les matières plastiques sont fabriquées principalement à partir :",["du pétrole","du fer","du sable","du cuivre"],"Le verre, lui, est fabriqué à partir de sable."],
+["Le verre est fabriqué principalement à partir :",["du sable","du pétrole","du fer","du bois"],"On le chauffe à très haute température."]]},
+{sem:0,name:"Les atomes et les ions",qs:[
+["Un atome est formé :",["d'un noyau et d'électrons","seulement d'électrons","seulement d'un noyau","de molécules"],"Les électrons tournent autour du noyau."],
+["Un atome est électriquement :",["neutre","positif","négatif","tantôt positif, tantôt négatif"],"Il a autant de charges positives (noyau) que d'électrons."],
+["Le noyau d'un atome porte une charge :",["positive","négative","nulle","variable"],"Les électrons portent des charges négatives."],
+["L'atome de carbone a Z = 6. Il possède :",["6 électrons","12 électrons","3 électrons","6 noyaux"],"Z est le numéro atomique : il donne le nombre d'électrons de l'atome."],
+["Un ion positif provient d'un atome qui a :",["perdu un ou plusieurs électrons","gagné des électrons","perdu son noyau","gagné des protons"],"Moins d'électrons → excès de charges positives."],
+["L'ion chlorure Cl⁻ est un atome de chlore qui a :",["gagné 1 électron","perdu 1 électron","gagné 1 proton","perdu 1 proton"],"Le signe − indique un électron en plus."],
+["L'ion Fe³⁺ est un atome de fer qui a :",["perdu 3 électrons","gagné 3 électrons","perdu 3 protons","gagné 3 noyaux"],"Le signe 3+ indique 3 électrons en moins."],
+["Une solution ionique est électriquement :",["neutre","positive","négative","chargée selon sa couleur"],"Elle contient autant de charges positives que négatives."]]},
+{sem:0,name:"L'oxydation des métaux dans l'air",qs:[
+["La rouille se forme par l'action sur le fer :",["du dioxygène et de l'humidité","du diazote seul","de la lumière seule","du sel seul"],"La rouille est principalement de l'oxyde de fer III."],
+["La rouille est poreuse, donc :",["la corrosion continue jusqu'à détruire le fer","elle protège le fer","elle rend le fer plus solide","elle disparaît à la pluie"],"L'air et l'eau traversent la rouille et attaquent le fer en dessous."],
+["La couche d'alumine sur l'aluminium :",["protège le métal car elle est imperméable","détruit rapidement le métal","est poreuse comme la rouille","est verte"],"L'alumine (Al₂O₃) forme une fine couche protectrice."],
+["Le zinc dans l'air humide se couvre d'une couche :",["grise qui le protège","rouge qui le détruit","verte qui le dissout","transparente qui le fait briller"],"C'est pourquoi on recouvre le fer de zinc (galvanisation)."],
+["La galvanisation consiste à :",["recouvrir le fer d'une couche de zinc","peindre l'aluminium en rouge","chauffer le cuivre","mettre le fer dans l'eau"],"Le zinc protège le fer de la rouille."],
+["Pour protéger le fer de la rouille, on peut :",["le peindre ou le recouvrir de zinc","le laisser sous la pluie","le mettre dans l'eau salée","le gratter souvent"],"On empêche l'air humide d'atteindre le fer."],
+["La combustion de la laine de fer dans le dioxygène donne :",["de l'oxyde magnétique Fe₃O₄","du dioxyde de carbone","de l'eau","de l'alumine"],"3 Fe + 2 O₂ → Fe₃O₄."],
+["Le vert-de-gris se forme sur :",["le cuivre","le fer","l'aluminium","le plastique"],"C'est la couche verte qu'on voit sur les vieux objets en cuivre."]]},
+{sem:0,name:"La combustion des matériaux organiques",qs:[
+["Un matériau organique contient principalement :",["du carbone et de l'hydrogène","du fer et du cuivre","du sable","seulement de l'oxygène"],"Le bois, le papier, le coton et les plastiques sont organiques."],
+["La combustion complète d'un matériau organique produit :",["du dioxyde de carbone et de l'eau","du fer","du dioxygène","du sel"],"On les identifie avec l'eau de chaux et le sulfate de cuivre anhydre."],
+["La fumée noire d'une combustion incomplète contient :",["du carbone (suie)","de l'eau pure","du dioxygène","du sel"],"Le manque de dioxygène laisse du carbone non brûlé."],
+["L'eau formée lors d'une combustion est mise en évidence par :",["le sulfate de cuivre anhydre qui bleuit","l'eau de chaux","un aimant","la soude"],"Le sulfate de cuivre anhydre blanc devient bleu."],
+["Brûler du PVC est dangereux car cela libère :",["du chlorure d'hydrogène, un gaz toxique","du dioxygène","de l'eau pure","du diazote"],"Ce gaz est toxique et forme un acide avec l'humidité."],
+["La combustion incomplète peut produire :",["du monoxyde de carbone, gaz toxique","seulement de l'eau","du dioxygène","de l'azote pur"],"Le CO est inodore et mortel."],
+["Pour se débarrasser des déchets plastiques, il vaut mieux :",["les trier et les recycler","les brûler à l'air libre","les jeter dans la nature","les enterrer dans le jardin"],"La combustion libère des gaz toxiques."]]},
+{sem:0,name:"Les solutions acides et basiques (pH)",qs:[
+["Une solution de pH = 3 est :",["acide","neutre","basique","pure"],"pH < 7 : acide ; pH = 7 : neutre ; pH > 7 : basique."],
+["L'eau pure a un pH égal à :",["7","0","14","1"],"L'eau pure est neutre."],
+["Une solution basique a un pH :",["supérieur à 7","inférieur à 7","égal à 7","égal à 0"],"Par exemple, la soude a un pH proche de 13 ou 14."],
+["Le pH se mesure avec :",["du papier pH ou un pH-mètre","un thermomètre","un ampèremètre","une balance"],"Le papier pH change de couleur selon le pH."],
+["Une solution acide contient plus :",["d'ions H⁺ que d'ions OH⁻","d'ions OH⁻ que d'ions H⁺","de sucre","de sel"],"Dans une solution basique, c'est l'inverse."],
+["Quand on dilue une solution acide, son pH :",["augmente en se rapprochant de 7","diminue","devient supérieur à 7","ne change pas"],"La solution devient moins acide, mais reste acide."],
+["Pour diluer un acide concentré, il faut :",["verser l'acide dans l'eau","verser l'eau dans l'acide","chauffer l'acide","ajouter du sel"],"Verser l'eau dans l'acide peut provoquer des projections dangereuses."],
+["Le jus de citron a un pH d'environ 2. Il est :",["acide","basique","neutre","pur"],"pH < 7."]]},
+{sem:0,name:"Action des solutions acides et basiques sur les métaux",qs:[
+["L'acide chlorhydrique réagit avec le fer en libérant :",["du dihydrogène","du dioxygène","du dioxyde de carbone","du diazote"],"Il se forme aussi des ions fer II (Fe²⁺)."],
+["Le dihydrogène se reconnaît car :",["il produit une petite détonation près d'une flamme","il trouble l'eau de chaux","il bleuit le sulfate de cuivre anhydre","il rallume une bûchette incandescente"],"Rallumer une bûchette est le test du dioxygène."],
+["Le cuivre réagit-il avec l'acide chlorhydrique dilué ?",["Non","Oui, fortement","Oui, en produisant du dioxygène","Oui, il fond"],"Le fer, le zinc et l'aluminium réagissent, mais pas le cuivre."],
+["L'équation de la réaction du fer avec l'acide chlorhydrique est :",["Fe + 2 H⁺ → Fe²⁺ + H₂","Fe + H₂ → FeH₂","Fe + O₂ → FeO₂","Fe → Fe + H₂O"],"Les ions chlorure Cl⁻ ne participent pas à la réaction."],
+["L'acide chlorhydrique réagit avec le zinc en formant :",["des ions Zn²⁺ et du dihydrogène","du cuivre","de l'eau seulement","du dioxygène"],"Zn + 2 H⁺ → Zn²⁺ + H₂."],
+["La soude (solution basique) réagit avec :",["l'aluminium et le zinc","le fer et le cuivre","le verre","le plastique"],"Le fer et le cuivre ne réagissent pas avec la soude."],
+["On ne doit pas conserver une boisson acide dans une canette en fer non protégée car :",["l'acide attaque le métal","le fer rend la boisson plus froide","le fer est isolant","rien ne se passe"],"Les ions métalliques peuvent passer dans la boisson."]]},
+{sem:0,name:"Tests de reconnaissance de quelques ions",qs:[
+["Avec la soude, les ions cuivre Cu²⁺ donnent un précipité :",["bleu","vert","rouille","blanc"],"Précipité bleu d'hydroxyde de cuivre."],
+["Avec la soude, les ions fer II Fe²⁺ donnent un précipité :",["vert","bleu","rouille","blanc"],"Précipité vert d'hydroxyde de fer II."],
+["Avec la soude, les ions fer III Fe³⁺ donnent un précipité :",["rouille (brun-rouge)","vert","bleu","blanc"],"Précipité rouille d'hydroxyde de fer III."],
+["Avec la soude, un précipité blanc indique les ions :",["zinc Zn²⁺ ou aluminium Al³⁺","cuivre Cu²⁺","fer III Fe³⁺","fer II Fe²⁺"],"Les deux donnent un précipité blanc."],
+["Les ions chlorure Cl⁻ se reconnaissent avec :",["le nitrate d'argent : précipité blanc qui noircit à la lumière","la soude : précipité bleu","l'eau de chaux","le sulfate de cuivre anhydre"],"C'est le test caractéristique des ions chlorure."],
+["Le réactif utilisé pour identifier les ions métalliques est :",["la soude (hydroxyde de sodium)","l'eau de chaux","le nitrate d'argent","le sulfate de cuivre anhydre"],"La couleur du précipité indique l'ion présent."],
+["Une solution donne un précipité bleu avec la soude. Elle contient :",["des ions Cu²⁺","des ions Fe²⁺","des ions Cl⁻","des ions Zn²⁺"],"Bleu = cuivre II."]]},
+{sem:0,name:"Dangers de quelques matériaux usuels",qs:[
+["Les matières plastiques jetées dans la nature :",["mettent des centaines d'années à se dégrader","disparaissent en quelques jours","nourrissent les plantes","sont sans effet"],"Elles polluent les sols et les mers."],
+["Les piles usagées doivent être :",["déposées dans un point de collecte","jetées dans la nature","brûlées","jetées dans l'eau"],"Elles contiennent des métaux lourds dangereux (mercure, plomb, cadmium)."],
+["Brûler des plastiques à l'air libre :",["libère des gaz toxiques","purifie l'air","produit de l'eau potable","est recommandé"],"Certains plastiques libèrent du chlorure d'hydrogène ou des fumées toxiques."],
+["Le recyclage permet de :",["réutiliser la matière et réduire les déchets","augmenter la pollution","fabriquer du pétrole","détruire les métaux"],"On recycle le verre, les métaux, le papier et certains plastiques."],
+["Un pictogramme de sécurité sur un produit sert à :",["indiquer le danger du produit","décorer l'emballage","donner le prix","indiquer la couleur"],"Il signale par exemple un produit corrosif, toxique ou inflammable."],
+["Le plomb, autrefois utilisé dans les peintures et les tuyaux, est :",["toxique pour la santé","bon pour la santé","sans effet","un plastique"],"Il provoque des intoxications graves."]]},
+{sem:1,name:"Le mouvement et le repos",qs:[
+["Le mouvement d'un corps est toujours décrit par rapport à :",["un corps de référence","sa couleur","sa masse","la température"],"Un même corps peut être en mouvement pour un observateur et au repos pour un autre."],
+["Un passager assis dans un bus qui roule est, par rapport au bus :",["au repos","en mouvement","en chute","en rotation"],"Par rapport à la route, il est en mouvement."],
+["La trajectoire est :",["l'ensemble des positions occupées par un point au cours du mouvement","la vitesse du corps","la masse du corps","la durée du mouvement"],"Elle peut être rectiligne, circulaire ou curviligne."],
+["La trajectoire d'un point d'une roue qui tourne autour d'un axe fixe est :",["circulaire","rectiligne","immobile","en zigzag"],"Chaque point décrit un cercle autour de l'axe."],
+["Un tiroir qu'on ouvre est en mouvement de :",["translation rectiligne","rotation","repos","translation circulaire"],"Tous ses points se déplacent en ligne droite de la même façon."],
+["Les aiguilles d'une horloge sont en mouvement de :",["rotation","translation rectiligne","repos absolu","chute libre"],"Elles tournent autour d'un axe fixe."]]},
+{sem:1,name:"La vitesse et la vitesse moyenne",qs:[
+["La vitesse moyenne se calcule par :",["v = d / t","v = d × t","v = t / d","v = m / V"],"Distance parcourue divisée par la durée du parcours."],
+["Une voiture parcourt 120 km en 2 h. Sa vitesse moyenne est :",["60 km/h","240 km/h","120 km/h","30 km/h"],"v = 120 / 2 = 60 km/h."],
+["1 m/s est égal à :",["3,6 km/h","36 km/h","1 km/h","1000 km/h"],"1 m/s = 3600 m/h = 3,6 km/h."],
+["72 km/h correspondent à :",["20 m/s","72 m/s","259,2 m/s","7,2 m/s"],"72 / 3,6 = 20 m/s."],
+["Dans un mouvement uniforme, la vitesse :",["reste constante","augmente","diminue","est nulle"],"Uniforme veut dire que la vitesse ne change pas."],
+["Une voiture qui démarre a un mouvement :",["accéléré","ralenti","uniforme","de repos"],"Sa vitesse augmente."],
+["La distance d'arrêt d'un véhicule est égale à :",["distance de réaction + distance de freinage","distance de freinage seulement","distance de réaction seulement","distance de réaction − distance de freinage"],"Elle augmente avec la vitesse, la fatigue et une route mouillée."],
+["Un cycliste roule à 5 m/s pendant 60 s. Il parcourt :",["300 m","12 m","65 m","3000 m"],"d = v × t = 5 × 60 = 300 m."]]},
+{sem:1,name:"Les actions mécaniques et les forces",qs:[
+["Une action mécanique peut :",["mettre en mouvement, modifier un mouvement ou déformer un corps","changer la couleur d'un corps","changer la masse d'un corps","créer de la lumière"],"Ce sont les trois effets d'une action mécanique."],
+["L'attraction d'un aimant sur un clou est une action :",["à distance","de contact","impossible","de contact et répartie"],"L'aimant agit sans toucher le clou."],
+["La main qui pousse une porte exerce une action :",["de contact","à distance","nulle","magnétique"],"Il y a contact entre la main et la porte."],
+["L'action du vent sur une voile est une action :",["de contact répartie","à distance localisée","nulle","magnétique"],"Le vent agit sur toute la surface de la voile."],
+["Le poids est une action :",["à distance et répartie","de contact et localisée","de contact et répartie","nulle"],"La Terre attire tout le volume du corps sans le toucher."],
+["Un fil qui tient une lampe exerce une action :",["de contact localisée","à distance","répartie sur toute la lampe","magnétique"],"Elle s'exerce au point d'attache."]]},
+{sem:1,name:"Notion de force",qs:[
+["Une force se représente par :",["un vecteur (une flèche)","un point","un cercle","un carré"],"Le vecteur montre la direction, le sens et l'intensité."],
+["Les caractéristiques d'une force sont :",["point d'application, droite d'action, sens et intensité","masse, volume, couleur et forme","vitesse et durée","température et pression"],"Ce sont les quatre éléments du vecteur force."],
+["L'intensité d'une force se mesure avec :",["un dynamomètre","une balance","un voltmètre","un thermomètre"],"Elle s'exprime en newtons (N)."],
+["L'unité de l'intensité d'une force est :",["le newton (N)","le kilogramme (kg)","le joule (J)","le watt (W)"],"Isaac Newton a donné son nom à cette unité."],
+["Avec l'échelle 1 cm ↔ 2 N, une force de 6 N est représentée par une flèche de :",["3 cm","6 cm","12 cm","2 cm"],"6 / 2 = 3 cm."],
+["Avec l'échelle 1 cm ↔ 5 N, une flèche de 4 cm représente une force de :",["20 N","4 N","9 N","1,25 N"],"4 × 5 = 20 N."]]},
+{sem:1,name:"Équilibre d'un solide soumis à deux forces",qs:[
+["Un corps soumis à deux forces est en équilibre si elles ont :",["la même droite d'action, la même intensité et des sens opposés","le même sens et la même intensité","des droites d'action perpendiculaires","des intensités différentes"],"Les deux forces se compensent."],
+["Une lampe suspendue à un fil est en équilibre sous l'action de :",["son poids et la tension du fil","son poids seulement","la tension du fil seulement","aucune force"],"Les deux forces sont verticales, de sens opposés et de même intensité."],
+["Un livre de poids 4 N est posé sur une table. La réaction de la table vaut :",["4 N, verticale vers le haut","4 N, verticale vers le bas","8 N","0 N"],"Elle compense exactement le poids."],
+["Si deux forces ont la même intensité et des sens opposés mais pas la même droite d'action, le corps :",["tourne : il n'est pas en équilibre","reste en équilibre","tombe toujours","disparaît"],"Les deux forces forment un couple qui fait tourner le corps."],
+["Un corps soumis à deux forces de 3 N et 5 N, opposées sur la même droite, est :",["non en équilibre","en équilibre","immobile obligatoirement","sans poids"],"Les intensités ne sont pas égales."],
+["Un corps en équilibre et immobile reste :",["immobile","en mouvement accéléré","en rotation","en chute"],"Les forces se compensent."]]},
+{sem:1,name:"Le poids et la masse",qs:[
+["Le poids d'un corps est :",["la force d'attraction exercée par la Terre sur ce corps","sa quantité de matière","son volume","sa vitesse"],"La quantité de matière, c'est la masse (en kg)."],
+["La relation entre le poids et la masse est :",["P = m × g","P = m / g","P = g / m","P = m + g"],"P en newtons, m en kilogrammes, g en N/kg."],
+["Un corps de 5 kg avec g = 10 N/kg a un poids de :",["50 N","5 N","0,5 N","15 N"],"P = 5 × 10 = 50 N."],
+["Sur la Lune, la masse d'un astronaute :",["est la même que sur la Terre","est plus petite","est nulle","est 6 fois plus grande"],"La masse ne change pas ; c'est son poids qui est environ 6 fois plus petit."],
+["Le poids est dirigé :",["verticalement vers le bas","verticalement vers le haut","horizontalement","dans tous les sens"],"Vers le centre de la Terre."],
+["Le point d'application du poids est :",["le centre de gravité du corps","le point le plus haut","le point de contact avec le sol","n'importe quel point"],"On le note souvent G."],
+["Un corps pèse 300 N sur la Terre (g = 10 N/kg). Sa masse est :",["30 kg","3000 kg","300 kg","3 kg"],"m = P / g = 300 / 10 = 30 kg."],
+["Sur la Lune, g ≈ 1,6 N/kg. Le poids d'un objet de 10 kg y vaut :",["16 N","100 N","10 N","1,6 N"],"P = 10 × 1,6 = 16 N."]]},
+{sem:1,name:"La loi d'Ohm",qs:[
+["La loi d'Ohm s'écrit :",["U = R × I","U = R / I","I = R × U","R = U × I"],"U en volts, R en ohms, I en ampères."],
+["Avec R = 100 Ω et I = 0,2 A, la tension U vaut :",["20 V","500 V","0,002 V","100,2 V"],"U = 100 × 0,2 = 20 V."],
+["Avec U = 12 V et R = 60 Ω, l'intensité I vaut :",["0,2 A","5 A","720 A","72 A"],"I = U / R = 12 / 60 = 0,2 A."],
+["Avec U = 6 V et I = 0,03 A, la résistance R vaut :",["200 Ω","0,18 Ω","18 Ω","2 Ω"],"R = U / I = 6 / 0,03 = 200 Ω."],
+["La caractéristique U = f(I) d'un conducteur ohmique est :",["une droite qui passe par l'origine","une courbe en cloche","une droite horizontale","un cercle"],"U et I sont proportionnels."],
+["Un conducteur ohmique traversé par un courant :",["s'échauffe (effet Joule)","se refroidit","devient isolant","émet un son"],"C'est le principe du radiateur et du fer à repasser."]]},
+{sem:1,name:"La puissance électrique",qs:[
+["La puissance électrique d'un appareil (lampe, radiateur) se calcule par :",["P = U × I","P = U / I","P = R × U","P = I / U"],"P en watts (W)."],
+["L'unité de la puissance est :",["le watt (W)","le joule (J)","l'ohm (Ω)","le volt (V)"],"1 kW = 1000 W."],
+["Une lampe porte l'indication 220 V – 100 W. Cela signifie :",["sous 220 V, elle consomme 100 W","elle supporte 100 V","elle produit 220 W","elle consomme 100 A"],"Ce sont sa tension et sa puissance nominales."],
+["Un appareil fonctionne sous 220 V et est traversé par 5 A. Sa puissance est :",["1100 W","44 W","225 W","215 W"],"P = 220 × 5 = 1100 W."],
+["Une lampe de 60 W sous 220 V est traversée par une intensité d'environ :",["0,27 A","3,7 A","13 200 A","280 A"],"I = P / U = 60 / 220 ≈ 0,27 A."],
+["La puissance totale de plusieurs appareils branchés ensemble est :",["la somme de leurs puissances","la plus petite des puissances","toujours 220 W","nulle"],"Si elle dépasse la puissance autorisée, le disjoncteur coupe le courant."]]},
+{sem:1,name:"L'énergie électrique",qs:[
+["L'énergie électrique consommée se calcule par :",["E = P × t","E = P / t","E = U / I","E = R × t"],"Avec P en kW et t en heures, E est en kWh."],
+["L'unité internationale de l'énergie est :",["le joule (J)","le watt (W)","le volt (V)","l'ampère (A)"],"Le kilowattheure (kWh) est l'unité utilisée sur les factures."],
+["Un fer à repasser de 1000 W fonctionne 2 h. Il consomme :",["2 kWh","500 Wh","2000 kWh","0,5 kWh"],"E = 1 kW × 2 h = 2 kWh."],
+["1 Wh est égal à :",["3600 J","60 J","1000 J","1 J"],"1 Wh = 1 W × 3600 s = 3600 J."],
+["Une lampe de 100 W fonctionne 5 h. Elle consomme :",["0,5 kWh","500 kWh","20 kWh","5 kWh"],"E = 100 × 5 = 500 Wh = 0,5 kWh."],
+["Le compteur électrique mesure :",["l'énergie consommée en kWh","la tension","la résistance","la puissance maximale"],"La facture d'électricité est calculée à partir de ces kWh."],
+["Pour économiser l'énergie électrique, on peut :",["éteindre les appareils inutilisés et utiliser des lampes LED","laisser la lumière allumée","ouvrir le réfrigérateur longtemps","utiliser plus d'appareils"],"Les lampes LED consomment beaucoup moins que les lampes à incandescence."]]}
+]}};
+
+const QN=10, LETTERS="ABCD", SALT="laboqcm-pc-2026";
+const rnd=n=>Math.floor(Math.random()*n);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},
+  del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const starsOf=p=>p>=.9?3:p>=.7?2:p>=.5?1:0;
+const starsHTML=n=>[0,1,2].map(i=>`<span class="${i<n?"":"off"}">★</span>`).join("");
+const $app=document.getElementById("app");
+const setColor=l=>$app.style.setProperty("--lc",BANK[l].color);
+const clean=s=>String(s).replace(/[|]/g," ").replace(/\s+/g," ").trim();
+const norm=s=>clean(s).toLowerCase();
+function copyText(text,btn){
+  const done=()=>{const t=btn.textContent;btn.textContent="Copié ✓";setTimeout(()=>btn.textContent=t,1600)};
+  const fallback=()=>{const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();
+    try{document.execCommand("copy");done()}catch(e){btn.textContent="Sélectionnez le texte pour le copier"}ta.remove()};
+  try{navigator.clipboard.writeText(text).then(done,fallback)}catch(e){fallback()}
+}
+function toQuestions(pool,n){return shuffle(pool).slice(0,n).map(({q,ch})=>({text:q[0],answer:q[1][0],opts:shuffle(q[1]),exp:q[2],ch}))}
+function poolOf(level,idx){const L=BANK[level];return idx.flatMap(i=>L.chapters[i].qs.map(q=>({q,ch:L.chapters[i].name})))}
+
+/* ---------- Codes de quiz : "2AC-ADF" = 2AC, leçons A, D et F (A = leçon 1) ---------- */
+const ABC="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const makeCode=(level,idx)=>level+"-"+idx.slice().sort((a,b)=>a-b).map(i=>ABC[i]).join("");
+function parseCode(c){
+  c=String(c||"").trim().toUpperCase().replace(/\s+/g,"");
+  const m=c.match(/^([123]AC)-?([A-Z]+)$/);if(!m)return null;
+  const L=BANK[m[1]];const idx=[...new Set(m[2].split("").map(d=>ABC.indexOf(d)))].sort((a,b)=>a-b);
+  if(idx.some(i=>i>=L.chapters.length))return null;
+  const n=idx.reduce((t,i)=>t+L.chapters[i].qs.length,0);
+  return{level:m[1],idx,code:makeCode(m[1],idx),n};
+}
+/* ---------- Signature des résultats (empêche de modifier la note dans le message) ---------- */
+function hash(s){let h=2166136261;for(const ch of s){h^=ch.codePointAt(0);h=Math.imul(h,16777619)>>>0}
+  let h2=h;for(const ch of s+SALT){h2^=ch.codePointAt(0);h2=Math.imul(h2,2654435761)>>>0}
+  return(h.toString(36)+h2.toString(36)).toUpperCase().slice(-6)}
+const sign=r=>hash([SALT,norm(r.name),norm(r.cls),r.quiz,r.score,r.total,r.date].join("|"));
+const message=r=>`LaboQCM | Nom: ${r.name} | Classe: ${r.cls} | Quiz: ${r.quiz} | Note: ${r.score}/${r.total} | Date: ${r.date} | Code: ${r.sig}`;
+function parseMessage(line){
+  if(!/LaboQCM/i.test(line))return null;
+  const g=k=>{const m=line.match(new RegExp("\\b"+k+":\\s*([^|]*)"));return m?m[1].trim():""};
+  const note=g("Note").match(/(\d+)\s*\/\s*(\d+)/);if(!g("Nom")||!note)return null;
+  const r={name:g("Nom"),cls:g("Classe"),quiz:g("Quiz"),score:+note[1],total:+note[2],date:g("Date"),sig:g("Code").toUpperCase()};
+  r.valid=sign(r)===r.sig;return r;
+}
+function nowStr(){const d=new Date(),p=n=>String(n).padStart(2,"0");return`${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`}
+
+/* ================= ACCUEIL ÉLÈVE ================= */
+function home(){
+  const pre=parseCode(location.hash.slice(1));
+  const me=LS.get("lq-me",{name:"",cls:""});
+  $app.style.setProperty("--lc","var(--c2)");
+  $app.innerHTML=`
+  <section class="board">
+    <h1>Labo QCM</h1>
+    <p>Physique-chimie au collège. Écris ton nom et le code du quiz donné par ton professeur, puis réponds à ${QN} questions.</p>
+    <div class="formula">ρ = m/V &nbsp; U = R·I</div>
+  </section>
+  <form class="card form" id="f" novalidate>
+    <h2>Passer un quiz</h2>
+    <label for="nm">Nom et prénom</label><input id="nm" maxlength="40" autocomplete="name" value="${esc(me.name)}">
+    <label for="cl">Classe</label><input id="cl" maxlength="15" placeholder="exemple : 2AC-3" value="${esc(me.cls)}">
+    <label for="cd">Code du quiz</label><input id="cd" maxlength="32" placeholder="exemple : 2AC-ADF" autocapitalize="characters" value="${pre?pre.code:""}">
+    <p class="err" id="err" hidden></p>
+    <button class="btn" type="submit">Commencer le quiz</button>
+  </form>
+  <button class="btn ghost" id="train">S'entraîner librement</button>
+  <button class="link" id="prof">Espace professeur</button>`;
+  document.getElementById("train").onclick=practiceHome;
+  document.getElementById("prof").onclick=()=>teacher();
+  document.getElementById("f").onsubmit=e=>{
+    e.preventDefault();
+    const name=clean(document.getElementById("nm").value),cls=clean(document.getElementById("cl").value),code=parseCode(document.getElementById("cd").value),err=document.getElementById("err");
+    const fail=t=>{err.textContent=t;err.hidden=false};
+    if(name.length<2)return fail("Écris ton nom et ton prénom.");
+    if(!cls)return fail("Écris ta classe.");
+    if(!code)return fail("Ce code n'existe pas. Vérifie le code écrit par ton professeur (exemple : 2AC-ADF).");
+    LS.set("lq-me",{name,cls});
+    const done=LS.get("lq-done-"+code.code,null);
+    if(done&&norm(done.rec.name)===norm(name))return examResult(done);
+    let run=LS.get("lq-run",null);
+    if(!run||run.quiz!==code.code||norm(run.name)!==norm(name)){
+      run={name,cls,quiz:code.code,level:code.level,qs:toQuestions(poolOf(code.level,code.idx),QN),i:0,picks:[]};
+      LS.set("lq-run",run);
+    }
+    examAsk(run);
+  };
+}
+
+/* ================= QUIZ NOTÉ ================= */
+function examAsk(run){
+  const q=run.qs[run.i],n=run.qs.length;setColor(run.level);let pick=null;
+  $app.innerHTML=`
+  <div class="top"><span class="count">${esc(run.name)}</span><div class="bar"><i style="width:${run.i/n*100}%"></i></div><span class="count">${run.i+1}/${n}</span></div>
+  <section class="question pop"><span class="tag">Quiz ${run.quiz} · ${esc(q.ch)}</span><div class="q">${esc(q.text)}</div></section>
+  <div class="opts">${q.opts.map((o,k)=>`<button class="opt" data-k="${k}"><span class="letter">${LETTERS[k]}</span><span>${esc(o)}</span></button>`).join("")}</div>
+  <button class="btn" id="next" disabled>${run.i+1<n?"Valider et continuer":"Valider et terminer"}</button>
+  <p class="muted" style="text-align:center">Choisis une réponse. Tu ne pourras pas revenir en arrière.</p>`;
+  const btns=[...$app.querySelectorAll(".opt")],next=document.getElementById("next");
+  btns.forEach(b=>b.onclick=()=>{pick=+b.dataset.k;btns.forEach(x=>x.classList.toggle("sel",x===b));next.disabled=false});
+  next.onclick=()=>{
+    if(pick==null)return;
+    run.picks[run.i]=q.opts[pick];run.i++;LS.set("lq-run",run);
+    if(run.i<n)return examAsk(run);
+    const score=run.qs.filter((x,k)=>x.answer===run.picks[k]).length;
+    const rec={name:run.name,cls:run.cls,quiz:run.quiz,score,total:n,date:nowStr()};rec.sig=sign(rec);
+    const done={rec,level:run.level,qs:run.qs,picks:run.picks};
+    LS.set("lq-done-"+run.quiz,done);LS.del("lq-run");examResult(done);
+  };
+}
+function examResult(done){
+  const r=done.rec,s=starsOf(r.score/r.total),msg=message(r);setColor(done.level);
+  $app.innerHTML=`
+  <section class="board result"><span class="label" style="color:var(--boardink);opacity:.85">${esc(r.name)} · ${esc(r.cls)} · Quiz ${r.quiz}</span>
+    <div class="big">${r.score}/${r.total}</div><div class="stars">${starsHTML(s)}</div><p>Terminé le ${esc(r.date)}</p></section>
+  <div class="card"><h2>Envoie ta note à ton professeur</h2>
+    <p class="muted">Copie ce message et envoie-le à ton professeur (WhatsApp, e-mail…). Ne le modifie pas : sinon il sera refusé.</p>
+    <div class="msg" id="msg">${esc(msg)}</div>
+    <button class="small-btn" id="cp">Copier le message</button></div>
+  <div class="label">Correction</div>
+  <div class="review">${done.qs.map((q,k)=>{const ok=q.answer===done.picks[k];return`<div class="corr ${ok?"":"wrong"}"><b>${k+1}.</b> ${esc(q.text)}<br>
+    ${ok?`<span class="good">✓ ${esc(q.answer)}</span>`:`<span class="you">✗ Ta réponse : ${esc(done.picks[k])}</span><br><span class="good">✓ ${esc(q.answer)}</span>`}<br>${esc(q.exp)}</div>`}).join("")}</div>
+  <button class="btn ghost" id="home">Retour à l'accueil</button>`;
+  document.getElementById("cp").onclick=e=>copyText(msg,e.currentTarget);
+  document.getElementById("home").onclick=home;
+}
+
+/* ================= ESPACE PROFESSEUR ================= */
+let tLevel="1AC",tSel=[],confirmWipe=false;
+/* Comptes professeurs : chaque prof crée son compte avec le code d'établissement.
+   Les comptes sont enregistrés sur l'appareil (empreinte SHA-256 salée, jamais le mot de passe). */
+const ADMIN_HASH="d9250278dee90a2d2ce5c5b3bd80272bfd065c9c32315c299fbdeca640180e9b";
+const INVITE_HASH="469813128b03840252774d481583f97bd775047965cfc936c0a0c547046051f6";
+let profUser=null,fails=0,lockUntil=0,authMode="in";
+async function sha256(s){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+const accounts=()=>LS.get("lq-accounts",{});
+const tokenOf=u=>u==="prof"?ADMIN_HASH:(accounts()[u]||{}).hash;
+const gradesKey=()=>profUser==="prof"?"lq-grades":"lq-grades-"+profUser;
+(function restore(){
+  let t=null;try{t=JSON.parse(sessionStorage.getItem("lq-prof")||localStorage.getItem("lq-prof")||"null")}catch(e){}
+  if(t&&t.u&&t.h&&tokenOf(t.u)===t.h)profUser=t.u;
+})();
+function openSession(u,h,keep){
+  profUser=u;fails=0;const t=JSON.stringify({u,h});
+  try{sessionStorage.setItem("lq-prof",t);if(keep)localStorage.setItem("lq-prof",t)}catch(e){}
+  teacher();
+}
+function login(){
+  $app.style.setProperty("--lc","var(--c2)");
+  const isNew=authMode==="new";
+  $app.innerHTML=`
+  <div class="top"><button class="back" id="back">← Accueil</button></div>
+  <section class="board"><h1>Espace professeur</h1><p>Accès réservé aux professeurs. ${isNew?"Créez votre compte avec le code d'établissement.":"Connectez-vous pour créer des quiz et voir les notes de vos élèves."}</p></section>
+  <div class="tabs" style="grid-template-columns:1fr 1fr">
+    <button class="tab" id="m-in" style="--lc:var(--c2)" aria-selected="${!isNew}">Se connecter</button>
+    <button class="tab" id="m-new" style="--lc:var(--c2)" aria-selected="${isNew}">Créer un compte</button></div>
+  <form class="card form" id="lf" novalidate>
+    <label for="lg">Identifiant</label><input id="lg" autocomplete="username" autocapitalize="none" maxlength="30" ${isNew?'placeholder="exemple : m.alaoui"':""}>
+    <label for="pw">Mot de passe</label><input id="pw" type="password" autocomplete="${isNew?"new-password":"current-password"}" maxlength="60">
+    ${isNew?`<label for="pw2">Confirmer le mot de passe</label><input id="pw2" type="password" autocomplete="new-password" maxlength="60">
+    <label for="inv">Code d'établissement</label><input id="inv" autocapitalize="characters" maxlength="20" placeholder="donné par le responsable">`:""}
+    <label class="row" style="margin:0;font-weight:600" for="keep"><input type="checkbox" id="keep" style="width:18px;height:18px"> Rester connecté sur cet appareil</label>
+    <p class="err" id="lerr" hidden></p>
+    <button class="btn" type="submit">${isNew?"Créer mon compte":"Se connecter"}</button>
+    <p class="muted">${isNew?"Le compte est enregistré sur cet appareil. Utilisez toujours le même téléphone ou ordinateur pour retrouver vos notes.":"Pas encore de compte ? Touchez « Créer un compte »."}</p>
+  </form>`;
+  document.getElementById("back").onclick=home;
+  document.getElementById("m-in").onclick=()=>{authMode="in";login()};
+  document.getElementById("m-new").onclick=()=>{authMode="new";login()};
+  document.getElementById("lf").onsubmit=async e=>{
+    e.preventDefault();
+    const err=document.getElementById("lerr"),fail=t=>{err.textContent=t;err.hidden=false};
+    const u=document.getElementById("lg").value.trim().toLowerCase(),pw=document.getElementById("pw").value;
+    const keep=document.getElementById("keep").checked;
+    if(Date.now()<lockUntil)return fail(`Trop d'essais. Réessayez dans ${Math.ceil((lockUntil-Date.now())/1000)} secondes.`);
+    try{
+      if(isNew){
+        if(!/^[a-z0-9._-]{3,30}$/.test(u))return fail("Identifiant : au moins 3 caractères (lettres, chiffres, point, tiret), sans espace.");
+        if(u==="prof"||accounts()[u])return fail("Cet identifiant existe déjà sur cet appareil. Choisissez-en un autre.");
+        if(pw.length<6)return fail("Le mot de passe doit avoir au moins 6 caractères.");
+        if(pw!==document.getElementById("pw2").value)return fail("Les deux mots de passe ne sont pas identiques.");
+        const inv=document.getElementById("inv").value.trim().toUpperCase();
+        if(await sha256("laboqcm-invite|"+inv)!==INVITE_HASH){fails++;if(fails>=5){lockUntil=Date.now()+30000;fails=0}return fail("Code d'établissement incorrect. Demandez-le au responsable.")}
+        const salt=[...crypto.getRandomValues(new Uint8Array(8))].map(x=>x.toString(16).padStart(2,"0")).join("");
+        const h=await sha256("laboqcm|"+u+"|"+salt+"|"+pw);
+        const all=accounts();all[u]={salt,hash:h,created:nowStr()};LS.set("lq-accounts",all);
+        authMode="in";return openSession(u,h,keep);
+      }
+      let h=null;
+      if(u==="prof"){const x=await sha256("laboqcm|prof|"+pw);if(x===ADMIN_HASH)h=x}
+      else{const a=accounts()[u];if(a){const x=await sha256("laboqcm|"+u+"|"+a.salt+"|"+pw);if(x===a.hash)h=x}}
+      if(h)return openSession(u,h,keep);
+    }catch(x){return fail("La connexion a échoué sur ce navigateur. Essayez avec Chrome.")}
+    fails++;if(fails>=5){lockUntil=Date.now()+30000;fails=0}
+    fail("Identifiant ou mot de passe incorrect.");document.getElementById("pw").value="";
+  };
+}
+function logout(){profUser=null;try{sessionStorage.removeItem("lq-prof");localStorage.removeItem("lq-prof")}catch(e){}home()}
+function teacher(){
+  if(!profUser)return login();
+  setColor(tLevel);
+  const L=BANK[tLevel];
+  const code=tSel.length?makeCode(tLevel,tSel):null;
+  const nAvail=tSel.reduce((t,i)=>t+L.chapters[i].qs.length,0);
+  const grades=LS.get(gradesKey(),[]).slice().sort((a,b)=>a.cls.localeCompare(b.cls)||a.name.localeCompare(b.name));
+  const valid=grades.filter(g=>g.valid);
+  const avg=valid.length?(valid.reduce((t,g)=>t+g.score/g.total*10,0)/valid.length).toFixed(1).replace(".",","):"–";
+  $app.innerHTML=`
+  <div class="top" style="justify-content:space-between"><button class="back" id="back">← Accueil</button><span class="row"><span class="count">${esc(profUser)}</span><button class="small-btn ghost" id="logout">Se déconnecter</button></span></div>
+  <section class="board"><h1>Espace professeur</h1><p>Choisissez les leçons pour créer un code de quiz. Chaque élève reçoit ${QN} questions tirées au hasard dans ces leçons.</p></section>
+  <div class="card">
+    <h2>1. Créer un quiz</h2>
+    <div class="tabs">${Object.keys(BANK).map(k=>`<button class="tab" style="--lc:${BANK[k].color}" data-l="${k}" aria-selected="${k===tLevel}">${k}<small>${BANK[k].sub}</small></button>`).join("")}</div>
+    ${L.sems.map((sn,s)=>{const ids=L.chapters.map((c,i)=>c.sem===s?i:-1).filter(i=>i>=0);const all=ids.every(i=>tSel.includes(i));return`
+    <div class="row" style="justify-content:space-between"><span class="label">Semestre ${s+1} · ${esc(sn)}</span><button class="small-btn ghost semall" data-s="${s}">${all?"Tout décocher":"Tout cocher"}</button></div>
+    <div class="checks">${ids.map(i=>{const c=L.chapters[i];return`<label class="check"><input type="checkbox" id="ch-${tLevel}-${i}" data-i="${i}" ${tSel.includes(i)?"checked":""}><span>${i+1}. ${esc(c.name)}</span><small>${c.qs.length} q.</small></label>`}).join("")}</div>`}).join("")}
+    ${code?`<div class="codebox"><div><div class="label" style="color:var(--boardink);opacity:.8">Code à donner aux élèves</div><div class="code">${code}</div></div><button class="small-btn" id="cpcode">Copier le code</button></div>
+      <p class="muted">${nAvail} questions disponibles.${nAvail<QN?` Attention : moins de ${QN}, chaque élève aura ${nAvail} questions. Cochez une autre leçon pour arriver à ${QN}.`:""} Écrivez le code au tableau. Vous pouvez aussi ajouter <b>#${code}</b> à la fin du lien de la page : le code sera déjà rempli pour les élèves.</p>`
+      :`<p class="muted">Cochez au moins une leçon pour obtenir le code.</p>`}
+  </div>
+  <div class="card">
+    <h2>2. Notes des élèves</h2>
+    <p class="muted">À la fin du quiz, chaque élève vous envoie un message qui commence par « LaboQCM ». Collez ici un ou plusieurs messages.</p>
+    <textarea id="paste" rows="4" placeholder="LaboQCM | Nom: … | Classe: … | Quiz: … | Note: …/10 | …"></textarea>
+    <div class="row"><button class="small-btn" id="add">Ajouter les notes</button><span id="status" aria-live="polite"></span></div>
+    ${grades.length?`
+    <div class="summary"><div><b>${grades.length}</b><span>élèves</span></div><div><b>${avg}</b><span>moyenne /10</span></div><div><b>${grades.length-valid.length}</b><span>messages refusés</span></div></div>
+    <div class="tablewrap"><table><thead><tr><th>Nom</th><th>Note</th><th>Classe</th><th>Quiz</th><th>Date</th><th>Contrôle</th></tr></thead><tbody>
+    ${grades.map(g=>`<tr><td>${esc(g.name)}</td><td><b>${g.score}/${g.total}</b></td><td>${esc(g.cls)}</td><td>${esc(g.quiz)}</td><td>${esc(g.date)}</td><td>${g.valid?`<span class="pill ok">valide</span>`:`<span class="pill ko">modifié</span>`}</td></tr>`).join("")}
+    </tbody></table></div>
+    <div class="row"><button class="small-btn ghost" id="cptab">Copier le tableau (Excel)</button>
+      ${confirmWipe?`<span class="muted">Effacer toutes les notes ?</span><button class="small-btn danger" id="wipe2">Oui, effacer</button><button class="small-btn ghost" id="nowipe">Annuler</button>`:`<button class="small-btn ghost" id="wipe">Tout effacer</button>`}</div>
+    <p class="muted">« Modifié » veut dire que le message a été changé après le quiz (nom ou note) : la note n'est pas fiable. Les notes sont gardées seulement dans ce navigateur, sur cet appareil.</p>`
+    :`<p class="muted">Aucune note pour l'instant. Les notes ajoutées s'affichent ici dans un tableau, triées par classe.</p>`}
+  </div>`;
+  document.getElementById("back").onclick=home;
+  document.getElementById("logout").onclick=logout;
+  $app.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{if(b.dataset.l!==tLevel){tLevel=b.dataset.l;tSel=[]}teacher()});
+  $app.querySelectorAll(".semall").forEach(b=>b.onclick=()=>{const s=+b.dataset.s;const ids=L.chapters.map((c,i)=>c.sem===s?i:-1).filter(i=>i>=0);const all=ids.every(i=>tSel.includes(i));tSel=all?tSel.filter(i=>!ids.includes(i)):[...new Set([...tSel,...ids])];teacher()});
+  $app.querySelectorAll(".check input").forEach(c=>c.onchange=()=>{const i=+c.dataset.i;tSel=c.checked?[...tSel,i]:tSel.filter(x=>x!==i);teacher()});
+  if(code)document.getElementById("cpcode").onclick=e=>copyText(code,e.currentTarget);
+  document.getElementById("add").onclick=()=>{
+    const lines=document.getElementById("paste").value.split(/\n+/).map(parseMessage).filter(Boolean);
+    const st=document.getElementById("status");
+    if(!lines.length){st.innerHTML=`<span class="err">Aucun message LaboQCM reconnu.</span>`;return}
+    const all=LS.get(gradesKey(),[]);let added=0;
+    lines.forEach(r=>{if(!all.some(g=>g.sig===r.sig&&norm(g.name)===norm(r.name))){all.push(r);added++}});
+    LS.set(gradesKey(),all);teacher();
+    document.getElementById("status").innerHTML=`<span class="ok-text">${added} note${added>1?"s":""} ajoutée${added>1?"s":""}${lines.length-added?` (${lines.length-added} déjà présente${lines.length-added>1?"s":""})`:""}.</span>`;
+  };
+  if(grades.length){
+    document.getElementById("cptab").onclick=e=>copyText(["Nom\tClasse\tQuiz\tNote\tSur\tDate\tContrôle",...grades.map(g=>[g.name,g.cls,g.quiz,g.score,g.total,g.date,g.valid?"valide":"modifié"].join("\t"))].join("\n"),e.currentTarget);
+    const w=document.getElementById("wipe");if(w)w.onclick=()=>{confirmWipe=true;teacher()};
+    const w2=document.getElementById("wipe2");if(w2)w2.onclick=()=>{LS.del(gradesKey());confirmWipe=false;teacher()};
+    const nw=document.getElementById("nowipe");if(nw)nw.onclick=()=>{confirmWipe=false;teacher()};
+  }
+}
+
+/* ================= ENTRAÎNEMENT LIBRE ================= */
+let prefs=LS.get("laboqcm2",{best:{},done:0,level:"1AC"});
+const savePrefs=()=>LS.set("laboqcm2",prefs);
+let quiz=null;
+function practiceHome(){
+  const L=BANK[prefs.level];setColor(prefs.level);
+  const bestMix=prefs.best[prefs.level+":mix"];
+  $app.innerHTML=`
+  <div class="top"><button class="back" id="back">← Accueil</button></div>
+  <section class="board"><h1>Entraînement</h1><p>Révise à ton rythme. La correction s'affiche après chaque question. Ces quiz ne sont pas notés.</p></section>
+  <div class="tabs">${Object.keys(BANK).map(k=>`<button class="tab" style="--lc:${BANK[k].color}" data-l="${k}" aria-selected="${k===prefs.level}">${k}<small>${BANK[k].sub}</small></button>`).join("")}</div>
+  <div class="label">Leçons de ${prefs.level}</div>
+  <div class="lessons">
+    <button class="lesson mix" data-c="mix"><span class="num">∑</span><span class="txt"><h3>Toutes les leçons</h3><small>${QN} questions mélangées</small></span><span class="stars">${starsHTML(bestMix!=null?starsOf(bestMix):0)}</span></button>
+    ${L.chapters.map((c,i)=>{const b=prefs.best[prefs.level+":"+i];return`${i===0||L.chapters[i-1].sem!==c.sem?`<div class="label" style="margin-top:8px">Semestre ${c.sem+1} · ${esc(L.sems[c.sem])}</div>`:""}
+    <button class="lesson" data-c="${i}"><span class="num">${i+1}</span><span class="txt"><h3>${esc(c.name)}</h3><small>${c.qs.length} questions${b!=null?` · meilleur : ${Math.round(b*100)} %`:""}</small></span><span class="stars">${starsHTML(b!=null?starsOf(b):0)}</span></button>`}).join("")}
+  </div>`;
+  document.getElementById("back").onclick=home;
+  $app.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{prefs.level=b.dataset.l;savePrefs();practiceHome()});
+  $app.querySelectorAll(".lesson").forEach(b=>b.onclick=()=>pStart(b.dataset.c));
+}
+function pStart(c){
+  const L=BANK[prefs.level];
+  const idx=c==="mix"?L.chapters.map((_,i)=>i):[+c];
+  quiz={key:prefs.level+":"+c,title:c==="mix"?"Toutes les leçons":L.chapters[+c].name,qs:toQuestions(poolOf(prefs.level,idx),QN),i:0,score:0,miss:[]};pAsk();
+}
+function pAsk(){
+  const {qs,i}=quiz,q=qs[i],n=qs.length;
+  $app.innerHTML=`
+  <div class="top"><button class="back" id="back">← Leçons</button><div class="bar"><i style="width:${i/n*100}%"></i></div><span class="count">${i+1}/${n}</span></div>
+  <section class="question pop"><span class="tag">${prefs.level} · ${esc(q.ch)}</span><div class="q">${esc(q.text)}</div></section>
+  <div class="opts">${q.opts.map((o,k)=>`<button class="opt" data-k="${k}"><span class="letter">${LETTERS[k]}</span><span>${esc(o)}</span></button>`).join("")}</div>
+  <div id="fb" aria-live="polite"></div>
+  <button class="btn" id="next" hidden>${i+1<n?"Question suivante":"Voir mon score"}</button>`;
+  document.getElementById("back").onclick=practiceHome;
+  const btns=[...$app.querySelectorAll(".opt")],fb=document.getElementById("fb"),next=document.getElementById("next");
+  btns.forEach(b=>b.onclick=()=>{
+    const good=q.opts[+b.dataset.k]===q.answer;
+    if(good)quiz.score++;else quiz.miss.push(q);
+    btns.forEach(x=>{x.disabled=true;if(q.opts[+x.dataset.k]===q.answer)x.classList.add("ok")});
+    if(!good)b.classList.add("ko");
+    fb.innerHTML=`<div class="explain ${good?"ok":"ko"} pop"><b>${good?"Bonne réponse !":"Pas tout à fait…"}</b>${esc(q.exp)}</div>`;
+    next.hidden=false;next.focus();
+  });
+  next.onclick=()=>{quiz.i++;quiz.i<n?pAsk():pResult()};
+}
+function pResult(){
+  const {key,title,score,qs,miss}=quiz,n=qs.length,p=score/n,prev=prefs.best[key];
+  const record=prev==null||p>prev;if(record)prefs.best[key]=p;prefs.done++;savePrefs();
+  const s=starsOf(p);
+  const msg=s===3?"Excellent ! Tu maîtrises cette leçon.":s===2?"Très bien ! Encore un effort pour 3 étoiles.":s===1?"C'est un début. Relis ta leçon et rejoue.":"Révise la leçon puis réessaie, tu vas progresser.";
+  $app.innerHTML=`
+  <section class="board result"><span class="label" style="color:var(--boardink);opacity:.8">${prefs.level} · ${esc(title)}</span>
+    <div class="big">${score}/${n}</div><div class="stars">${starsHTML(s)}</div>
+    <p>${msg}${record&&prev!=null?" Nouveau record !":""}</p></section>
+  <div class="actions"><button class="btn" id="again">Rejouer</button><button class="btn ghost" id="menu">Choisir une autre leçon</button></div>
+  ${miss.length?`<div class="label">À revoir (${miss.length})</div><div class="review">${miss.map(q=>`<div class="miss">${esc(q.text)}<br><span class="good">✓ ${esc(q.answer)}</span><br>${esc(q.exp)}</div>`).join("")}</div>`:""}`;
+  document.getElementById("again").onclick=()=>pStart(key.split(":")[1]);
+  document.getElementById("menu").onclick=practiceHome;
+}
+
+/* Reprise automatique d'un quiz noté interrompu (rechargement de la page) */
+const pending=LS.get("lq-run",null);
+if(pending&&pending.qs&&pending.i<pending.qs.length)examAsk(pending);else home();
+</script>
+</body>
+</html>
