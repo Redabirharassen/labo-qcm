@@ -1151,13 +1151,22 @@ function mailto(mail,r,msg){
 /* ---------- Envoi automatique de la note vers la feuille Google Sheets du professeur (application web Apps Script) ---------- */
 const SHEET_URL="https://script.google.com/macros/s/AKfycby6kT10v_2ImO3cWL8AR6fhEYzR0DGGDlIh3r3eJ0zCCqp1J-QGd6tb2g1WisDGLuWnZg/exec";
 const canSend=()=>!!SHEET_URL&&!FRAMED;
-async function sendGrade(done){
-  if(done.sent)return true;
-  const r=done.rec;
+/* Un envoi. Google répond parfois par une page d'erreur alors que la note est bien enregistrée :
+   on renvoie alors la même note, le script la reconnaît (pas de doublon) et confirme. */
+async function postGrade(r){
   const res=await fetch(SHEET_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
     body:JSON.stringify({name:r.name,cls:r.cls,quiz:r.quiz,score:r.score,total:r.total,date:r.date,sig:r.sig})});
-  const j=await res.json();if(!j||!j.ok)throw new Error("refus");
-  done.sent=true;LS.set("lq-done-"+r.quiz,done);return true;
+  const t=await res.text();try{return JSON.parse(t)}catch(e){return null}
+}
+async function sendGrade(done){
+  if(done.sent)return true;
+  for(let k=0;k<4;k++){
+    if(k)await new Promise(ok=>setTimeout(ok,k*1500));
+    let j=null;try{j=await postGrade(done.rec)}catch(e){}
+    if(j&&j.ok){done.sent=true;LS.set("lq-done-"+done.rec.quiz,done);return true}
+    if(j&&j.error)break;
+  }
+  throw new Error("envoi impossible");
 }
 /* Au démarrage : renvoyer les notes qui n'ont pas pu partir (élève hors connexion à la fin du quiz) */
 function retryPending(){
