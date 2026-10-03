@@ -1148,6 +1148,23 @@ function mailto(mail,r,msg){
   const e=encodeURIComponent;
   return"mailto:"+e(mail).replace(/%40/g,"@")+"?subject="+e(`LaboQCM - ${r.name} - ${r.cls} - Quiz ${r.quiz}`)+"&body="+e(msg);
 }
+/* ---------- Envoi automatique de la note vers la feuille Google Sheets du professeur (application web Apps Script) ---------- */
+const SHEET_URL="https://script.google.com/macros/s/AKfycby6kT10v_2ImO3cWL8AR6fhEYzR0DGGDlIh3r3eJ0zCCqp1J-QGd6tb2g1WisDGLuWnZg/exec";
+const canSend=()=>!!SHEET_URL&&!FRAMED;
+async function sendGrade(done){
+  if(done.sent)return true;
+  const r=done.rec;
+  const res=await fetch(SHEET_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify({name:r.name,cls:r.cls,quiz:r.quiz,score:r.score,total:r.total,date:r.date,sig:r.sig})});
+  const j=await res.json();if(!j||!j.ok)throw new Error("refus");
+  done.sent=true;LS.set("lq-done-"+r.quiz,done);return true;
+}
+/* Au démarrage : renvoyer les notes qui n'ont pas pu partir (élève hors connexion à la fin du quiz) */
+function retryPending(){
+  if(!canSend())return;
+  try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);
+    if(k&&k.indexOf("lq-done-")===0){const d=LS.get(k,null);if(d&&d.rec&&d.auto&&!d.sent)sendGrade(d).catch(()=>{})}}}catch(e){}
+}
 function nowStr(){const d=new Date(),p=n=>String(n).padStart(2,"0");return`${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`}
 
 /* ================= ACCUEIL ÉLÈVE ================= */
@@ -1168,6 +1185,7 @@ function home(){
     <label for="cd">Code du quiz</label><input id="cd" maxlength="32" placeholder="exemple : 2AC-ADF" autocapitalize="characters" value="${pre?pre.code:""}">
     <p class="err" id="err" hidden></p>
     <button class="btn" type="submit">Commencer le quiz</button>
+    ${canSend()?`<p class="muted">À la fin du quiz, ton nom, ta classe et ta note sont envoyés à ton professeur.</p>`:""}
   </form>
   <button class="btn ghost" id="train">S'entraîner librement</button>
   <button class="link" id="prof">Espace professeur</button>
@@ -1210,17 +1228,20 @@ function examAsk(run){
     if(run.i<n)return examAsk(run);
     const score=run.qs.filter((x,k)=>x.answer===run.picks[k]).length;
     const rec={name:run.name,cls:run.cls,quiz:run.quiz,score,total:n,date:nowStr()};rec.sig=sign(rec);
-    const done={rec,level:run.level,qs:run.qs,picks:run.picks,mail:LS.get("lq-tmail","")};
+    const done={rec,level:run.level,qs:run.qs,picks:run.picks,mail:LS.get("lq-tmail",""),auto:canSend()};
     LS.set("lq-done-"+run.quiz,done);LS.del("lq-run");examResult(done);
   };
 }
 function examResult(done){
   const r=done.rec,s=starsOf(r.score/r.total),msg=message(r);setColor(done.level);
   const tm=[done.mail,LS.get("lq-tmail","")].find(validMail)||"";
+  const auto=canSend()&&(done.auto||done.sent);
   $app.innerHTML=`
   <section class="board result"><span class="label" style="color:var(--boardink);opacity:.85">${esc(r.name)} · ${esc(r.cls)} · Quiz ${r.quiz}</span>
     <div class="big">${r.score}/${r.total}</div><div class="stars">${starsHTML(s)}</div><p>Terminé le ${esc(r.date)}</p></section>
-  <div class="card"><h2>Envoie ta note à ton professeur</h2>
+  <div class="card"><h2 id="sh">${auto?"Ta note pour ton professeur":"Envoie ta note à ton professeur"}</h2>
+    ${auto?`<div id="sst" aria-live="polite"></div><p class="muted" id="alt" hidden>Tu peux aussi envoyer ta note toi-même :</p>`:""}
+    <div id="manual" style="display:contents"${auto?" hidden":""}>
     ${tm?`<a class="btn" id="send" href="${esc(mailto(tm,r,msg))}"${FRAMED?' target="_blank" rel="noopener"':""}>Envoyer ma note par e-mail</a>
     <p class="muted">Ta messagerie s'ouvre avec le message déjà écrit : il reste à appuyer sur « Envoyer ». Si rien ne s'ouvre, copie l'adresse et le message ci-dessous, puis envoie-les toi-même.</p>
     <div class="row"><span class="label">Adresse du professeur</span></div>
@@ -1228,7 +1249,7 @@ function examResult(done){
     :`<p class="muted">Copie ce message et envoie-le à ton professeur (WhatsApp, e-mail…).</p>`}
     <div class="msg" id="msg">${esc(msg)}</div>
     <p class="muted">Ne modifie pas le message : sinon il sera refusé.</p>
-    <button class="small-btn" id="cp">Copier le message</button></div>
+    <button class="small-btn" id="cp">Copier le message</button></div></div>
   <div class="label">Correction</div>
   <div class="review">${done.qs.map((q,k)=>{const ok=q.answer===done.picks[k];return`<div class="corr ${ok?"":"wrong"}"><b>${k+1}.</b> ${esc(q.text)}<br>
     ${ok?`<span class="good">✓ ${esc(q.answer)}</span>`:`<span class="you">✗ Ta réponse : ${esc(done.picks[k])}</span><br><span class="good">✓ ${esc(q.answer)}</span>`}<br>${esc(q.exp)}</div>`}).join("")}</div>
@@ -1236,6 +1257,18 @@ function examResult(done){
   document.getElementById("cp").onclick=e=>copyText(msg,e.currentTarget);
   if(tm)document.getElementById("cpm").onclick=e=>copyText(tm,e.currentTarget);
   document.getElementById("home").onclick=home;
+  if(auto){
+    const sst=document.getElementById("sst"),manual=document.getElementById("manual"),alt=document.getElementById("alt");
+    const show=state=>{
+      if(!sst.isConnected)return;
+      if(state==="ok"){sst.innerHTML=`<p class="ok-text">✓ Ta note a été envoyée à ton professeur.</p>`;manual.hidden=true;alt.hidden=true}
+      else if(state==="wait"){sst.innerHTML=`<p class="muted">Envoi de ta note à ton professeur…</p>`}
+      else{sst.innerHTML=`<p class="err">La note n'a pas pu être envoyée. Vérifie ta connexion Internet.</p><div class="row"><button class="small-btn" id="retry">Réessayer l'envoi</button></div>`;
+        manual.hidden=false;alt.hidden=false;document.getElementById("retry").onclick=go}
+    };
+    const go=()=>{show("wait");sendGrade(done).then(()=>show("ok"),()=>show("ko"))};
+    done.sent?show("ok"):go();
+  }
 }
 
 /* ================= ESPACE PROFESSEUR ================= */
@@ -1349,7 +1382,8 @@ function teacher(){
   </form>
   <div class="card">
     <h2>3. Notes des élèves</h2>
-    <p class="muted">À la fin du quiz, chaque élève vous envoie un message qui commence par « LaboQCM » (par e-mail ou WhatsApp). Collez ici un ou plusieurs messages.</p>
+    ${canSend()?`<p class="muted">Les notes des quiz arrivent automatiquement dans la feuille Google Sheets « Labo QCM - Notes », gérée par le responsable de l'application. Le tableau ci-dessous sert aux messages reçus à la main.</p>`:""}
+    <p class="muted">À la fin du quiz, chaque élève peut aussi vous envoyer un message qui commence par « LaboQCM » (par e-mail ou WhatsApp). Collez ici un ou plusieurs messages.</p>
     <textarea id="paste" rows="4" placeholder="LaboQCM | Nom: … | Classe: … | Quiz: … | Note: …/10 | …"></textarea>
     <div class="row"><button class="small-btn" id="add">Ajouter les notes</button><span id="status" aria-live="polite"></span></div>
     ${grades.length?`
@@ -1457,7 +1491,7 @@ function pResult(){
 }
 
 /* Reprise automatique d'un quiz noté interrompu (rechargement de la page) */
-readHash();
+readHash();retryPending();
 const pending=LS.get("lq-run",null);
 if(pending&&pending.qs&&pending.i<pending.qs.length)examAsk(pending);else home();
 </script>
