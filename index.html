@@ -1165,7 +1165,7 @@ const hm=h=>h.slice(0,2)+":"+h.slice(2);
 function timeRules(code){
   const r=[];
   if(code.t)r.push(`Durée : ${code.t} min`);
-  if(code.p)r.push("Démarré par le professeur");
+  if(code.p)r.push("Lancé par le professeur");
   if(code.w)r.push(`Ouvert le ${code.w.dd}/${code.w.mm} de ${hm(code.w.h1)} à ${hm(code.w.h2)}`);
   return r.join(" · ");
 }
@@ -1300,7 +1300,7 @@ function waitScreen(code,name,cls,retry){
   clearInterval(waitTimer);setColor(code.level);
   $app.innerHTML=`
   <section class="board wait"><span class="dot">⏳</span><h1>En attente du professeur</h1>
-    <p>Quiz ${esc(code.code)} · ${esc(name)}. Le quiz commencera tout seul dès que ton professeur appuiera sur « Démarrer ». Garde cette page ouverte.</p></section>
+    <p>Quiz ${esc(code.code)} · ${esc(name)}. Le quiz commencera tout seul dès que ton professeur le lancera. Garde cette page ouverte.</p></section>
   <p class="muted" id="wst" style="text-align:center" aria-live="polite"></p>
   <button class="btn ghost" id="home">Retour à l'accueil</button>`;
   document.getElementById("home").onclick=()=>{clearInterval(waitTimer);waitTimer=null;home()};
@@ -1472,11 +1472,11 @@ async function livePanel(code){
     document.getElementById("lre").onclick=()=>livePanel(code);return}
   const t=j.at?new Date(j.at):null,hh=t?p2(t.getHours())+":"+p2(t.getMinutes()):"";
   box.classList.toggle("on",!!j.on);
-  st.textContent=j.on?`▶ Quiz en cours depuis ${hh}`:j.stopped?`■ Quiz arrêté à ${hh}`:"Quiz pas encore démarré. Les élèves qui entrent le code attendent votre signal.";
+  st.textContent=j.on?`▶ Quiz en cours depuis ${hh}`:j.stopped?`■ Quiz arrêté à ${hh}`:"Quiz pas encore lancé. Les élèves qui entrent le code attendent votre signal.";
   const needKey=!liveKeyOf();
   bt.innerHTML=`${needKey?`<label for="linv" style="font-weight:800;font-size:.9rem">Code d'établissement (une seule fois)</label>
       <input id="linv" autocapitalize="characters" maxlength="20" style="font:inherit;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink)">`:""}
-    ${j.on?`<button class="btn stop" id="lstop">■ Arrêter le quiz</button>`:`<button class="btn go" id="lgo">▶ ${j.stopped?"Redémarrer":"Démarrer"} le quiz</button>`}
+    ${j.on?`<button class="btn stop" id="lstop">■ Arrêter le quiz</button>`:`<button class="btn go" id="lgo">▶ ${j.stopped?"Relancer":"Lancer"} le quiz</button>`}
     <p class="muted">${j.on?"« Arrêter » termine le quiz pour tous les élèves : leurs notes sont envoyées avec les réponses déjà données.":"Dès que vous appuyez, tous les élèves en attente commencent en même temps."}</p>`;
   const act=async(action,b)=>{
     const msg=document.getElementById("lmsg");let key=liveKeyOf();
@@ -1487,8 +1487,8 @@ async function livePanel(code){
     }
     b.disabled=true;b.textContent="Envoi…";
     let r=null;try{r=await sheetCall({action,quiz:code,cle:key})}catch(e){}
-    if(r&&r.ok){msg.innerHTML=`<p class="ok-text">${action==="start"?"Quiz démarré : les élèves peuvent commencer.":"Quiz arrêté pour tous les élèves."}</p>`;livePanel(code)}
-    else{b.disabled=false;b.textContent=action==="start"?"▶ Démarrer le quiz":"■ Arrêter le quiz";
+    if(r&&r.ok){msg.innerHTML=`<p class="ok-text">${action==="start"?"Quiz lancé : les élèves commencent maintenant.":"Quiz arrêté pour tous les élèves."}</p>`;livePanel(code)}
+    else{b.disabled=false;b.textContent=action==="start"?"▶ Lancer le quiz":"■ Arrêter le quiz";
       msg.innerHTML=`<p class="err">${r&&r.error?esc(r.error):"Le serveur n'a pas répondu. Vérifiez la connexion, et que le script Google est à jour (version 3)."}</p>`}
   };
   const g=document.getElementById("lgo");if(g)g.onclick=()=>act("start",g);
@@ -1530,7 +1530,7 @@ async function runDiag(){
 
 /* ================= ESPACE PROFESSEUR ================= */
 let tLevel="1AC",tSel=[],confirmWipe=false,tMailDraft=null,tMailMsg="";
-let tDur=0,tWin={on:false,date:"",from:"",to:""},tStart=false,liveMsg="";
+let tDur=0,tWin={on:false,date:"",from:"",to:""},tStart=true,liveMsg="";
 /* réglages de temps choisis par le professeur → {t,w} pour le code, ou {err} */
 function tOpts(){
   const o={t:tDur||0,w:null,p:tStart};
@@ -1639,7 +1639,7 @@ function teacher(){
     <div class="form tset">
       <label for="tdur">Durée du quiz</label>
       <select id="tdur">${durs.map(d=>`<option value="${d}"${d===tDur?" selected":""}>${d?d+" minutes":"Sans limite de durée"}</option>`).join("")}</select>
-      <label class="check"><input type="checkbox" id="tpon"${tStart?" checked":""}><span>Le quiz commence seulement quand j'appuie sur « Démarrer »</span></label>
+      <label class="check"><input type="checkbox" id="tpon"${tStart?" checked":""}><span>Je lance le quiz moi-même avec le bouton « Lancer le quiz » (recommandé)</span></label>
       <label class="check"><input type="checkbox" id="twon"${tWin.on?" checked":""}><span>Ouvrir le quiz seulement à une date et une heure précises</span></label>
       ${tWin.on?`<div class="times">
         <label style="grid-column:1/-1">Date<input type="date" id="twd" value="${esc(tWin.date)}"></label>
@@ -1650,9 +1650,9 @@ function teacher(){
     </div>
     ${code?`<div class="codebox"><div style="min-width:0"><div class="label" style="color:var(--boardink);opacity:.8">Code à donner aux élèves</div><div class="code${code.length>9?" long":""}">${code}</div></div><button class="small-btn" id="cpcode">Copier le code</button></div>
       ${timeRules(parseCode(code))?`<p class="rules">⏱ ${esc(timeRules(parseCode(code)))}</p>`:""}
-      ${tStart?(canSend()?`<div class="live" id="live"><p class="state" id="lstate">Vérification de l'état du quiz…</p>
+      ${tStart?(canSend()?`<div class="live" id="live"><h2>Lancer le quiz</h2><p class="state" id="lstate">Vérification de l'état du quiz…</p>
         <div id="lbtns"></div><div id="lmsg" aria-live="polite">${liveMsg}</div></div>`
-        :`<p class="err">Le bouton « Démarrer » fonctionne dans l'application Labo QCM et sur la page GitHub, pas dans cet aperçu.</p>`):""}
+        :`<p class="err">Le bouton « Lancer le quiz » fonctionne dans l'application Labo QCM et sur la page GitHub, pas dans cet aperçu.</p>`):""}
       <p class="muted">${nAvail} questions disponibles.${nAvail<QN?` Attention : moins de ${QN}, chaque élève aura ${nAvail} questions. Cochez une autre leçon pour arriver à ${QN}.`:""} Écrivez le code au tableau, ou envoyez ce lien aux élèves : le code sera déjà rempli.</p>
       <div class="msg" id="lnk">${esc(link)}</div>
       <div class="row"><button class="small-btn" id="cplink">Copier le lien du quiz</button></div>
