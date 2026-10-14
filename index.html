@@ -1,29 +1,21 @@
-<!doctype html>
-<html lang="fr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Labo QCM : QCM de physique-chimie pour le collège (1AC, 2AC, 3AC). Quiz notés de 10 questions et entraînement libre.">
-<meta name="theme-color" content="#22463d">
-<style>:root{color-scheme:light}html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Labo QCM Collège</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;600;700;800&display=swap">
+<style>@font-face{font-family:"Baloo 2";font-weight:600;src:url(fonts/baloo-2-latin-600-normal.woff2) format("woff2");font-display:swap}@font-face{font-family:"Baloo 2";font-weight:800;src:url(fonts/baloo-2-latin-800-normal.woff2) format("woff2");font-display:swap}@font-face{font-family:"Nunito";font-weight:400;src:url(fonts/nunito-latin-400-normal.woff2) format("woff2");font-display:swap}@font-face{font-family:"Nunito";font-weight:600;src:url(fonts/nunito-latin-600-normal.woff2) format("woff2");font-display:swap}@font-face{font-family:"Nunito";font-weight:700;src:url(fonts/nunito-latin-700-normal.woff2) format("woff2");font-display:swap}@font-face{font-family:"Nunito";font-weight:800;src:url(fonts/nunito-latin-800-normal.woff2) format("woff2");font-display:swap}</style>
 <style>
 /* Layout: une colonne type téléphone ; accueil = tableau noir + onglets de niveau + liste des leçons ; quiz = énoncé au tableau, réponses A–D empilées */
 :root{
-  --bg:#edf2f0; --surface:#ffffff; --ink:#1b2a26; --muted:#5a6d67; --line:#d2dcd8;
-  --board:#22463d; --boardink:#f2f6f3; --chalk:#f5df72; --good:#2e8b57; --bad:#c2453b;
-  --c1:#e3a93b; --c2:#4f9cc4; --c3:#d26f55;
+  --bg:#f3f5f8; --surface:#ffffff; --ink:#172033; --muted:#5b6678; --line:#d9dfe7;
+  --board:#1d2b47; --boardink:#e9eef6; --chalk:#ffffff; --good:#1f8a5b; --bad:#c2413a;
+  --c1:#a9c6ea; --c2:#9fd2c8; --c3:#c9bcea; --star:#d6a43c; --focus:#3d6fd6;
   --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
   --body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#121e1b; --surface:#1b2b27; --ink:#e8f0ed; --muted:#9db1aa; --line:#2e443e;
-  --board:#295449; --good:#5cc286; --bad:#ec7a6f; color-scheme:dark}}
+  --bg:#0f1522; --surface:#172033; --ink:#e7ecf4; --muted:#9aa6b8; --line:#2a3549;
+  --board:#1f2e4d; --good:#4cc08a; --bad:#ec7a6f; --focus:#7da2f0; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#121e1b; --surface:#1b2b27; --ink:#e8f0ed; --muted:#9db1aa; --line:#2e443e;
-  --board:#295449; --good:#5cc286; --bad:#ec7a6f; color-scheme:dark}
+  --bg:#0f1522; --surface:#172033; --ink:#e7ecf4; --muted:#9aa6b8; --line:#2a3549;
+  --board:#1f2e4d; --good:#4cc08a; --bad:#ec7a6f; --focus:#7da2f0; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding:16px;padding-block:16px 32px}
 .app{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
@@ -39,20 +31,20 @@ button{font:inherit}
 .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .tab{all:unset;cursor:pointer;text-align:center;padding:10px 4px;border-radius:14px;border:2px solid var(--line);background:var(--surface);font-family:var(--display);font-size:1.25rem;line-height:1.1}
 .tab small{display:block;font-family:var(--body);font-size:.72rem;color:var(--muted);font-weight:700}
-.tab[aria-selected="true"]{background:var(--lc);border-color:var(--lc);color:#1b2a26}
-.tab[aria-selected="true"] small{color:#1b2a26}
-.tab:focus-visible,.lesson:focus-visible,.opt:focus-visible,.btn:focus-visible,.back:focus-visible{outline:3px solid var(--c2);outline-offset:2px}
+.tab[aria-selected="true"]{background:var(--lc);border-color:var(--lc);color:#172033}
+.tab[aria-selected="true"] small{color:#172033}
+.tab:focus-visible,.lesson:focus-visible,.opt:focus-visible,.btn:focus-visible,.back:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .lessons{display:flex;flex-direction:column;gap:10px}
 .lesson{all:unset;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:12px 14px;transition:border-color .15s,transform .15s}
 .lesson:hover{border-color:var(--lc);transform:translateX(2px)}
-.lesson .num{width:40px;height:40px;border-radius:12px;background:var(--lc);color:#1b2a26;display:grid;place-items:center;font-family:var(--display);font-size:1.15rem}
+.lesson .num{width:40px;height:40px;border-radius:12px;background:var(--lc);color:#172033;display:grid;place-items:center;font-family:var(--display);font-size:1.15rem}
 .lesson .txt{min-width:0}
 .lesson h3{font-size:1.08rem}
 .lesson small{color:var(--muted);font-size:.85rem}
 .lesson.mix{background:var(--board);border-color:var(--board);color:var(--boardink)}
 .lesson.mix small{color:var(--boardink);opacity:.8}
 .lesson.mix .num{background:var(--chalk)}
-.stars{color:var(--c1);letter-spacing:1px;white-space:nowrap}
+.stars{color:var(--star);letter-spacing:1px;white-space:nowrap}
 .stars .off{color:var(--line)}
 .lesson.mix .stars .off{color:rgba(255,255,255,.25)}
 /* quiz */
@@ -94,15 +86,15 @@ button{font:inherit}
 .card{background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
 .card h2{font-size:1.3rem}
 .form label{font-weight:800;font-size:.9rem;margin-bottom:-6px}
-.form input,textarea{font:inherit;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:11px 12px;width:100%;min-width:0}
-.form input:focus,textarea:focus{outline:none;border-color:var(--c2)}
+.form input,.form select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:11px 12px;width:100%;min-width:0}
+.form input:focus,textarea:focus{outline:none;border-color:var(--focus)}
 .err{color:var(--bad);font-weight:700;margin:0}
 .ok-text{color:var(--good);font-weight:700;margin:0}
 .muted{color:var(--muted);font-size:.9rem;margin:0}
 .link{all:unset;cursor:pointer;color:var(--muted);font-weight:700;text-decoration:underline;text-underline-offset:3px;text-align:center;padding:6px}
-.link:focus-visible{outline:3px solid var(--c2)}
+.link:focus-visible{outline:3px solid var(--focus)}
 .opt.sel{border-color:var(--lc);background:color-mix(in srgb,var(--lc) 18%,var(--surface))}
-.opt.sel .letter{background:var(--lc);color:#1b2a26}
+.opt.sel .letter{background:var(--lc);color:#172033}
 .btn:disabled{opacity:.45;cursor:default}
 .checks{display:flex;flex-direction:column;gap:8px}
 .check{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:10px 12px;border:2px solid var(--line);border-radius:12px;cursor:pointer}
@@ -110,12 +102,28 @@ button{font:inherit}
 .check input{width:20px;height:20px;accent-color:var(--board)}
 .check small{color:var(--muted);white-space:nowrap}
 .codebox{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--board);color:var(--boardink);border-radius:14px;padding:14px 16px}
-.codebox .code{font-family:var(--display);font-size:2rem;color:var(--chalk);letter-spacing:.04em;line-height:1}
+.codebox .code{font-family:var(--display);font-size:2rem;color:var(--chalk);letter-spacing:.04em;line-height:1.1;overflow-wrap:anywhere}
+.codebox .code.long{font-size:1.35rem}
+.timer{display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--display);font-size:1.35rem;font-variant-numeric:tabular-nums;background:var(--surface);border:2px solid var(--line);border-radius:14px;padding:6px 12px}
+.timer.low{border-color:var(--bad);color:var(--bad)}
+.tset{display:flex;flex-direction:column;gap:10px}
+.tset .times{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tset .times label{display:flex;flex-direction:column;gap:4px;margin:0;font-size:.85rem}
+.tset .check{grid-template-columns:auto 1fr}
+.rules{font-weight:700;font-size:.92rem;margin:0}
+.live{display:flex;flex-direction:column;gap:10px;border:2px solid var(--line);border-radius:14px;padding:14px}
+.live.on{border-color:var(--good);background:color-mix(in srgb,var(--good) 10%,var(--surface))}
+.live .state{font-family:var(--display);font-size:1.2rem;margin:0}
+.btn.go{background:var(--good);color:#fff}
+.btn.stop{background:var(--bad);color:#fff}
+.wait{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+@keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+.wait .dot{font-size:2.6rem;animation:pulse 1.6s ease-in-out infinite}
 .small-btn{all:unset;cursor:pointer;font-weight:800;font-size:.9rem;padding:8px 14px;border-radius:10px;background:var(--ink);color:var(--bg);text-align:center}
-.codebox .small-btn{background:var(--chalk);color:#1b2a26}
+.codebox .small-btn{background:var(--chalk);color:#172033}
 .small-btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
 .small-btn.danger{background:var(--bad);color:#fff}
-.small-btn:focus-visible{outline:3px solid var(--c2);outline-offset:2px}
+.small-btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .msg{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.82rem;background:var(--bg);border:1px dashed var(--line);border-radius:10px;padding:10px;overflow-wrap:anywhere;user-select:all}
 .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
@@ -139,8 +147,7 @@ a.btn{text-decoration:none}
 .inline{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .inline input{flex:1 1 200px}
 </style>
-</head>
-<body>
+
 <div class="app" id="app"></div>
 
 <script>
@@ -1083,6 +1090,18 @@ const BANK={
 ["À puissance égale, l'énergie consommée par un appareil est d'autant plus grande que :",["sa durée de fonctionnement est longue","sa durée de fonctionnement est courte","sa couleur est foncée","son fil est long"],"E = P × t."]]}
 ]}};
 
+/* ---------- Enrichissement 3AC chimie : questions de synthèse et nouvelle leçon ---------- */
+(function(){
+  const L=BANK["3AC"],ADD={"Quelques matériaux utilisés au quotidien": [["Un échantillon de plastique a une masse de 4,2 g et un volume de 4 cm³. Sa masse volumique est :", ["1,05 g/cm³", "0,95 g/cm³", "16,8 g/cm³", "0,2 g/cm³"], "ρ = m / V = 4,2 / 4 = 1,05 g/cm³. Erreurs fréquentes : calculer V / m (0,95), m × V (16,8) ou m − V (0,2).", "S"], ["Un plastique de masse volumique 1,05 g/cm³ est placé dans l'eau douce (ρ = 1 g/cm³), puis dans l'eau salée (ρ ≈ 1,2 g/cm³). Il :", ["coule dans l'eau douce et flotte dans l'eau salée", "flotte dans l'eau douce et dans l'eau salée", "coule dans l'eau douce et dans l'eau salée", "flotte dans l'eau douce et coule dans l'eau salée"], "1,05 > 1 : il coule dans l'eau douce ; 1,05 < 1,2 : il flotte dans l'eau salée. C'est le comportement du polystyrène (PS).", "S"], ["Un plastique flotte sur l'eau douce et aussi sur l'eau salée. Il s'agit du :", ["PE (polyéthylène)", "PS (polystyrène)", "PVC", "PET"], "Le PE est moins dense que l'eau douce : il flotte sur les deux. Le PS coule dans l'eau douce, le PVC et le PET coulent dans les deux.", "S"], ["Un plastique coule dans l'eau douce mais flotte dans l'eau salée. Il s'agit du :", ["PS (polystyrène)", "PE (polyéthylène)", "PVC", "PET"], "C'est le test de reconnaissance du PS : sa masse volumique est comprise entre celle de l'eau douce et celle de l'eau salée.", "S"], ["Une bouteille transparente coule dans l'eau douce, ne donne pas de flamme verte et se déforme dans l'eau bouillante. Elle est en :", ["PET", "PVC", "PS", "PE"], "Le PET se déforme dans l'eau bouillante. Le PVC donnerait une flamme verte et le PE flotterait.", "S"], ["La gaine d'un câble coule dans l'eau et brûle avec une flamme verte. Elle est en :", ["PVC", "PET", "PE", "PS"], "La flamme verte est le test du PVC (il contient du chlore).", "S"], ["Un sac en polyéthylène contient 5 cm³ de matière (ρ = 0,95 g/cm³). Sa masse est :", ["4,75 g", "5,26 g", "5,95 g", "0,19 g"], "m = ρ × V = 0,95 × 5 = 4,75 g. Diviser V par ρ (5,26) ou additionner (5,95) sont des erreurs.", "S"], ["Un objet métallique a une masse de 89 g et un volume de 10 cm³. Données : ρ(Al) = 2,7 ; ρ(Fe) = 7,8 ; ρ(Cu) = 8,9 g/cm³. L'objet est en :", ["cuivre", "fer", "aluminium", "on ne peut pas savoir"], "ρ = 89 / 10 = 8,9 g/cm³ : c'est la masse volumique du cuivre.", "S"], ["Une plaque d'aluminium a une masse de 0,54 kg et un volume de 200 cm³. Sa masse volumique est :", ["2,7 g/cm³", "0,0027 g/cm³", "370 g/cm³", "108 g/cm³"], "Il faut convertir : 0,54 kg = 540 g. ρ = 540 / 200 = 2,7 g/cm³. Sans conversion on trouve 0,0027 (faux).", "S"], ["Un bloc de fer a une masse de 390 g (ρ = 7,8 g/cm³). Son volume est :", ["50 cm³", "3042 cm³", "0,02 cm³", "382,2 cm³"], "V = m / ρ = 390 / 7,8 = 50 cm³. Multiplier m × ρ (3042) est une erreur fréquente.", "S"], ["Une canette de 15 g est en aluminium (ρ = 2,7 g/cm³). Le volume d'aluminium utilisé est environ :", ["5,6 cm³", "40,5 cm³", "0,18 cm³", "12,3 cm³"], "V = m / ρ = 15 / 2,7 ≈ 5,6 cm³.", "S"], ["On plonge un mélange de morceaux de PE et de PS dans l'eau douce. On récupère :", ["le PE à la surface et le PS au fond", "le PS à la surface et le PE au fond", "les deux à la surface", "les deux au fond"], "Le PE flotte sur l'eau douce, le PS y coule : l'eau douce permet de les séparer.", "S"], ["Pour séparer des morceaux de PS et de PVC mélangés, on peut utiliser :", ["l'eau salée : le PS flotte et le PVC coule", "l'eau douce : le PS flotte et le PVC coule", "l'eau salée : les deux flottent", "un aimant"], "Dans l'eau douce, les deux coulent. Dans l'eau salée, le PS flotte et le PVC (plus dense) coule.", "S"], ["Une plaque grise est attirée par un aimant. Elle peut être en :", ["fer", "aluminium", "cuivre", "zinc"], "Le fer est attiré par l'aimant ; l'aluminium, le cuivre et le zinc ne le sont pas.", "S"], ["Un métal gris n'est pas attiré par l'aimant et sa masse volumique est 2,7 g/cm³. C'est :", ["l'aluminium", "le fer", "le zinc", "le cuivre"], "Le fer est attiré par l'aimant, le cuivre est rouge brique. ρ = 2,7 g/cm³ est la masse volumique de l'aluminium.", "S"], ["Pour fabriquer le manche d'une casserole, on choisit un matériau :", ["organique (bois, bakélite), mauvais conducteur de la chaleur", "métallique, bon conducteur de la chaleur", "en cuivre, pour chauffer plus vite", "en aluminium, pour être léger"], "Le manche ne doit pas brûler la main : il faut un matériau organique qui conduit mal la chaleur (bois, bakélite).", "S"]], "La combustion des matériaux organiques": [["Lors d'une combustion complète, 16 g de méthane réagissent avec 64 g de dioxygène. Il se forme 44 g de dioxyde de carbone. La masse d'eau formée est :", ["36 g", "80 g", "124 g", "20 g"], "Conservation de la masse : 16 + 64 = 44 + m(eau), donc m(eau) = 80 − 44 = 36 g.", "S"], ["L'équation équilibrée de la combustion complète du méthane est :", ["CH₄ + 2 O₂ → CO₂ + 2 H₂O", "CH₄ + O₂ → CO₂ + H₂O", "CH₄ + 2 O₂ → CO₂ + H₂O", "CH₄ + 3 O₂ → CO₂ + 2 H₂O"], "À gauche : 1 C, 4 H, 4 O. À droite : 1 C, 4 H, 2 + 2 = 4 O. L'équation est équilibrée.", "S"], ["Dans CH₄ + 2 O₂ → CO₂ + 2 H₂O, le nombre d'atomes d'hydrogène dans les produits est :", ["4", "2", "6", "8"], "2 H₂O contient 2 × 2 = 4 atomes d'hydrogène, comme CH₄.", "S"], ["Dans 2 C₄H₁₀ + 13 O₂ → 8 CO₂ + 10 H₂O, le nombre d'atomes d'oxygène de chaque côté est :", ["26", "13", "18", "36"], "À gauche : 13 × 2 = 26. À droite : 8 × 2 + 10 × 1 = 26.", "S"], ["Dans 2 C₄H₁₀ + 13 O₂ → 8 CO₂ + 10 H₂O, le nombre d'atomes de carbone dans les réactifs est :", ["8", "4", "2", "10"], "2 molécules de butane × 4 atomes de carbone = 8, comme dans 8 CO₂.", "S"], ["On brûle complètement 12 g de carbone avec 32 g de dioxygène. La masse de dioxyde de carbone formé est :", ["44 g", "20 g", "12 g", "384 g"], "C + O₂ → CO₂ : la masse se conserve, 12 + 32 = 44 g.", "S"], ["Une bougie de 20 g brûle pendant une heure ; sa masse devient 14 g. La masse de paraffine brûlée est :", ["6 g", "34 g", "14 g", "20 g"], "m = 20 − 14 = 6 g. Cette paraffine est devenue du CO₂ et de la vapeur d'eau, partis dans l'air.", "S"], ["Les gaz produits par la combustion d'un matériau troublent l'eau de chaux et bleuissent le sulfate de cuivre anhydre. Le matériau contient :", ["du carbone et de l'hydrogène", "seulement du carbone", "seulement de l'hydrogène", "du chlore"], "L'eau de chaux troublée prouve le CO₂ (donc du carbone) ; le sulfate de cuivre bleui prouve l'eau (donc de l'hydrogène).", "S"], ["La combustion d'un plastique dégage un gaz qui rougit le papier pH humide. Ce plastique est :", ["le PVC", "le PE", "le PET", "le PS"], "Le PVC contient du chlore : sa combustion libère du chlorure d'hydrogène, un gaz acide et toxique.", "S"], ["Pour brûler complètement 1 L de butane, il faut 6,5 L de dioxygène. Pour 4 L de butane, il faut :", ["26 L de dioxygène", "10,5 L de dioxygène", "6,5 L de dioxygène", "1,6 L de dioxygène"], "C'est proportionnel : 4 × 6,5 = 26 L.", "S"], ["L'air contient environ 1/5 de dioxygène. Pour avoir 26 L de dioxygène, il faut environ :", ["130 L d'air", "5,2 L d'air", "26 L d'air", "31 L d'air"], "V(air) = 5 × 26 = 130 L. Diviser par 5 (5,2 L) est l'erreur inverse.", "S"], ["Une pièce de 50 m³ contient environ 21 % de dioxygène. Le volume de dioxygène est :", ["10,5 m³", "21 m³", "29 m³", "2,4 m³"], "V = 50 × 21 / 100 = 10,5 m³.", "S"], ["Une flamme jaune laisse un dépôt noir sur une assiette. Ce dépôt est :", ["du carbone (combustion incomplète)", "de l'eau", "du dioxyde de carbone", "du dioxygène"], "Quand le dioxygène manque, une partie du carbone ne brûle pas : c'est le noir de fumée.", "S"], ["Dans la combustion du papier à l'air, le combustible et le comburant sont :", ["combustible : le papier ; comburant : le dioxygène", "combustible : le dioxygène ; comburant : le papier", "combustible : le papier ; comburant : la chaleur", "combustible : le dioxyde de carbone ; comburant : l'eau"], "Le combustible brûle (papier) ; le comburant entretient la combustion (dioxygène).", "S"], ["La combustion complète du polyéthylène (PE), formé de carbone et d'hydrogène, produit :", ["du dioxyde de carbone et de l'eau", "du chlorure d'hydrogène", "du dioxyde de carbone seulement", "du dioxygène"], "Le PE ne contient que C et H : sa combustion complète donne CO₂ et H₂O.", "S"]], "L'oxydation des métaux dans l'air": [["3 Fe + 2 O₂ → Fe₃O₄. On brûle 16,8 g de fer avec 6,4 g de dioxygène. La masse d'oxyde magnétique formée est :", ["23,2 g", "10,4 g", "16,8 g", "6,4 g"], "Conservation de la masse : 16,8 + 6,4 = 23,2 g.", "S"], ["Une plaque de cuivre de 6,4 g est chauffée à l'air. On obtient 8 g d'oxyde de cuivre noir. La masse de dioxygène qui a réagi est :", ["1,6 g", "14,4 g", "8 g", "6,4 g"], "m(O₂) = 8 − 6,4 = 1,6 g. Additionner (14,4 g) est une erreur fréquente.", "S"], ["Un clou de 5,6 g rouille complètement et sa masse devient 8 g. La masse fixée sur le clou est :", ["2,4 g", "13,6 g", "5,6 g", "8 g"], "Le fer fixe de l'oxygène de l'air : 8 − 5,6 = 2,4 g. La rouille pèse donc plus que le fer de départ.", "S"], ["Quand un objet en fer rouille, sa masse :", ["augmente, car il fixe le dioxygène et l'eau de l'air", "diminue, car le fer disparaît", "ne change pas", "devient nulle"], "La rouille contient du fer, de l'oxygène et de l'eau : elle pèse plus que le fer de départ.", "S"], ["Dans 4 Fe + 3 O₂ → 2 Fe₂O₃, le nombre d'atomes de fer de chaque côté est :", ["4", "2", "6", "8"], "À gauche 4 Fe ; à droite 2 × 2 = 4 Fe.", "S"], ["Pour équilibrer … Al + … O₂ → 2 Al₂O₃, les coefficients sont :", ["4 et 3", "2 et 3", "4 et 6", "2 et 2"], "À droite : 4 Al et 6 O. Donc 4 Al et 3 O₂ (3 × 2 = 6).", "S"], ["Pour équilibrer 2 Cu + O₂ → … CuO, le coefficient de CuO est :", ["2", "1", "4", "3"], "2 Cu et 2 O à gauche : il faut 2 CuO.", "S"], ["Pour équilibrer 2 Zn + … O₂ → 2 ZnO, le coefficient de O₂ est :", ["1", "2", "4", "0,5"], "2 ZnO contiennent 2 atomes d'oxygène, soit 1 molécule O₂.", "S"], ["On place trois clous : tube 1 avec eau bouillie recouverte d'huile (sans air), tube 2 avec air sec, tube 3 avec air humide. Le clou rouille dans :", ["le tube 3 seulement", "le tube 1 seulement", "le tube 2 seulement", "les trois tubes"], "Il faut à la fois du dioxygène et de l'eau : seul le tube 3 réunit les deux.", "S"], ["D'après l'expérience des trois tubes, la formation de la rouille nécessite :", ["le dioxygène et l'eau ensemble", "l'eau seule", "l'air sec seul", "la lumière"], "Sans eau (air sec) ou sans dioxygène (eau bouillie sous huile), le fer ne rouille pas.", "S"], ["Un objet en aluminium ne se détruit pas à l'air comme le fer, car :", ["sa fine couche d'oxyde (alumine) est imperméable et protège le métal", "il ne réagit jamais avec le dioxygène", "il est plus lourd que le fer", "il est attiré par l'aimant"], "L'alumine Al₂O₃ forme une couche étanche ; la rouille, elle, est poreuse.", "S"], ["La rouille est poreuse. Cela veut dire que :", ["elle laisse passer l'air et l'eau : la corrosion continue en profondeur", "elle protège le fer", "elle est imperméable", "elle conduit bien le courant"], "C'est pour cela qu'un objet en fer peut être complètement détruit par la rouille.", "S"], ["Dans 160 g d'oxyde de fer Fe₂O₃, il y a 112 g de fer. La masse d'oxygène est :", ["48 g", "272 g", "112 g", "160 g"], "m(O) = 160 − 112 = 48 g.", "S"], ["Le nombre total d'atomes dans la formule Fe₂O₃ est :", ["5", "2", "3", "6"], "2 atomes de fer + 3 atomes d'oxygène = 5 atomes.", "S"], ["Pour protéger un portail en fer au bord de la mer, la meilleure solution est :", ["le peindre ou le galvaniser", "le mouiller régulièrement", "le laisser à l'air libre", "le chauffer"], "La peinture ou une couche de zinc empêchent le contact du fer avec l'air humide.", "S"]], "Les atomes et les ions": [["L'atome de carbone a Z = 6 (e = 1,6 × 10⁻¹⁹ C). La charge de son noyau Q(n) est :", ["+9,6 × 10⁻¹⁹ C", "−9,6 × 10⁻¹⁹ C", "+1,6 × 10⁻¹⁹ C", "+9,6 × 10¹⁹ C"], "Q(n) = Z × e = 6 × 1,6 × 10⁻¹⁹ = 9,6 × 10⁻¹⁹ C. Le noyau est positif.", "S"], ["Pour le même atome de carbone (Z = 6), la charge de ses électrons Q(e) est :", ["−9,6 × 10⁻¹⁹ C", "+9,6 × 10⁻¹⁹ C", "−1,6 × 10⁻¹⁹ C", "0 C"], "6 électrons : Q(e) = −6 × 1,6 × 10⁻¹⁹ = −9,6 × 10⁻¹⁹ C.", "S"], ["Pour l'atome de carbone, Q(A) = Q(n) + Q(e) vaut :", ["0 C", "+1,92 × 10⁻¹⁸ C", "−9,6 × 10⁻¹⁹ C", "+9,6 × 10⁻¹⁹ C"], "Q(A) = 9,6 × 10⁻¹⁹ + (−9,6 × 10⁻¹⁹) = 0 : l'atome est électriquement neutre.", "S"], ["Le noyau d'un atome a une charge Q(n) = +1,76 × 10⁻¹⁸ C (e = 1,6 × 10⁻¹⁹ C). Son numéro atomique est :", ["Z = 11", "Z = 1,76", "Z = 18", "Z = 110"], "Z = Q(n) / e = 1,76 × 10⁻¹⁸ / 1,6 × 10⁻¹⁹ = 11 (c'est le sodium).", "S"], ["Un noyau a une charge Q(n) = +2,08 × 10⁻¹⁸ C (e = 1,6 × 10⁻¹⁹ C). C'est le noyau de l'atome de :", ["aluminium (Z = 13)", "carbone (Z = 6)", "sodium (Z = 11)", "fer (Z = 26)"], "Z = 2,08 × 10⁻¹⁸ / 1,6 × 10⁻¹⁹ = 13 : aluminium.", "S"], ["L'atome de zinc a Z = 30. La charge des électrons de l'ion Zn²⁺, Q(e), est :", ["−4,48 × 10⁻¹⁸ C", "−4,8 × 10⁻¹⁸ C", "+4,48 × 10⁻¹⁸ C", "−3,2 × 10⁻¹⁹ C"], "Zn²⁺ a perdu 2 électrons : il en reste 28. Q(e) = −28 × 1,6 × 10⁻¹⁹ = −4,48 × 10⁻¹⁸ C.", "S"], ["La charge de l'ion Zn²⁺, Q(ion), est :", ["+3,2 × 10⁻¹⁹ C", "−3,2 × 10⁻¹⁹ C", "+4,8 × 10⁻¹⁸ C", "+1,6 × 10⁻¹⁹ C"], "Q(ion) = +2e = 2 × 1,6 × 10⁻¹⁹ = 3,2 × 10⁻¹⁹ C.", "S"], ["L'atome de fer a Z = 26. La charge des électrons de l'ion Fe³⁺, Q(e), est :", ["−3,68 × 10⁻¹⁸ C", "−4,16 × 10⁻¹⁸ C", "+3,68 × 10⁻¹⁸ C", "−4,8 × 10⁻¹⁹ C"], "Fe³⁺ a 26 − 3 = 23 électrons : Q(e) = −23 × 1,6 × 10⁻¹⁹ = −3,68 × 10⁻¹⁸ C.", "S"], ["La charge de l'ion Fe³⁺, Q(ion), est :", ["+4,8 × 10⁻¹⁹ C", "−4,8 × 10⁻¹⁹ C", "+4,16 × 10⁻¹⁸ C", "0 C"], "Q(ion) = +3e = 3 × 1,6 × 10⁻¹⁹ = 4,8 × 10⁻¹⁹ C.", "S"], ["L'atome d'oxygène a Z = 8. La charge de l'ion oxyde O²⁻, Q(ion), est :", ["−3,2 × 10⁻¹⁹ C", "+3,2 × 10⁻¹⁹ C", "−1,6 × 10⁻¹⁸ C", "−1,28 × 10⁻¹⁸ C"], "O²⁻ a gagné 2 électrons : Q(ion) = −2e = −3,2 × 10⁻¹⁹ C.", "S"], ["Un ion a 10 électrons et un noyau de charge Q(n) = +1,92 × 10⁻¹⁸ C (e = 1,6 × 10⁻¹⁹ C). Cet ion est :", ["Mg²⁺ (Z = 12)", "Na⁺ (Z = 11)", "O²⁻ (Z = 8)", "Ne (Z = 10)"], "Z = 1,92 × 10⁻¹⁸ / 1,6 × 10⁻¹⁹ = 12 (magnésium). 12 protons et 10 électrons : charge +2.", "S"], ["Un ion a Z = 8 et possède 10 électrons. Sa formule est :", ["O²⁻", "O²⁺", "O", "Ne"], "8 charges + et 10 charges − : il reste 2 charges négatives.", "S"], ["Un atome de sodium Na (Z = 11) perd un électron. Il devient :", ["l'ion Na⁺ avec 10 électrons", "l'ion Na⁻ avec 12 électrons", "l'ion Na⁺ avec 12 électrons", "un atome neutre"], "11 − 1 = 10 électrons ; il a une charge positive en excès.", "S"], ["Le diamètre d'un atome est d'environ 10⁻¹⁰ m et celui de son noyau 10⁻¹⁵ m. L'atome est plus grand que son noyau d'environ :", ["100 000 fois", "10 fois", "1000 fois", "5 fois"], "10⁻¹⁰ / 10⁻¹⁵ = 10⁻¹⁰⁺¹⁵ = 10⁵ = 100 000.", "S"], ["Si le noyau d'un atome avait la taille d'une bille de 1 cm, l'atome aurait un diamètre d'environ :", ["1 km", "1 m", "10 cm", "100 km"], "1 cm × 100 000 = 100 000 cm = 1 km : l'atome est presque vide.", "S"], ["La formule ionique du chlorure de fer III est :", ["(Fe³⁺ + 3 Cl⁻)", "(Fe³⁺ + Cl⁻)", "(Fe²⁺ + 2 Cl⁻)", "(3 Fe + Cl)"], "Il faut 3 ions Cl⁻ pour compenser les 3 charges positives de Fe³⁺ : la solution est neutre.", "S"], ["La formule ionique du chlorure d'aluminium est :", ["(Al³⁺ + 3 Cl⁻)", "(Al³⁺ + Cl⁻)", "(Al + 3 Cl)", "(Al³⁻ + 3 Cl⁺)"], "3 charges + (Al³⁺) et 3 charges − (3 Cl⁻) : la solution est électriquement neutre.", "S"]], "Les solutions acides et basiques (pH)": [["On dilue avec de l'eau une solution d'acide chlorhydrique de pH = 2. Le nouveau pH peut être :", ["3", "1", "7,5", "0"], "Quand on dilue un acide, son pH augmente en se rapprochant de 7, sans le dépasser.", "S"], ["On dilue avec de l'eau une solution de soude de pH = 12. Le nouveau pH peut être :", ["11", "13", "6", "14"], "Quand on dilue une base, son pH diminue en se rapprochant de 7, sans descendre en dessous.", "S"], ["On admet que diluer 10 fois un acide fort augmente son pH de 1. Une solution de pH = 2 diluée 10 fois a un pH de :", ["3", "12", "20", "0,2"], "2 + 1 = 3. Multiplier ou diviser par 10 n'a pas de sens pour le pH.", "S"], ["Même règle : une solution acide de pH = 2 est diluée 1000 fois (10 × 10 × 10). Son pH devient :", ["5", "3", "2000", "1000"], "Trois dilutions par 10 : 2 + 1 + 1 + 1 = 5.", "S"], ["Pour diluer 10 fois 10 mL d'acide, on ajoute :", ["90 mL d'eau (volume final 100 mL)", "100 mL d'eau", "10 mL d'eau", "1 mL d'eau"], "Volume final = 10 × 10 = 100 mL, donc on ajoute 100 − 10 = 90 mL d'eau.", "S"], ["On mélange 20 mL de solution acide avec 180 mL d'eau. La solution a été diluée :", ["10 fois", "9 fois", "180 fois", "200 fois"], "Volume final 200 mL ; 200 / 20 = 10.", "S"], ["Quatre solutions ont des pH de 3, 8, 1 et 6. La plus acide est celle de pH :", ["1", "3", "6", "8"], "Plus le pH est petit, plus la solution est acide.", "S"], ["Quatre solutions ont des pH de 8, 10, 13 et 7. La plus basique est celle de pH :", ["13", "8", "10", "7"], "Plus le pH est grand (au-dessus de 7), plus la solution est basique. pH = 7 est neutre.", "S"], ["Une solution contient plus d'ions H⁺ que d'ions HO⁻. Elle est :", ["acide (pH < 7)", "basique (pH > 7)", "neutre (pH = 7)", "de l'eau pure"], "L'excès d'ions H⁺ caractérise une solution acide.", "S"], ["L'eau pure a un pH égal à 7 parce qu'elle contient :", ["autant d'ions H⁺ que d'ions HO⁻", "seulement des ions H⁺", "seulement des ions HO⁻", "aucune molécule"], "Les deux sortes d'ions sont en même quantité : la solution est neutre.", "S"], ["Le jus de citron a un pH ≈ 2,5 et l'eau savonneuse un pH ≈ 9. On peut dire que :", ["le citron est acide et l'eau savonneuse est basique", "les deux sont acides", "les deux sont basiques", "le citron est basique et l'eau savonneuse est acide"], "pH < 7 : acide ; pH > 7 : basique.", "S"], ["Un sol a un pH de 5, trop acide pour une culture. L'agriculteur ajoute de la chaux (basique). Le pH du sol :", ["augmente vers 7", "diminue vers 3", "reste à 5", "devient 0"], "Une base neutralise une partie de l'acidité : le pH remonte vers 7.", "S"], ["Pour diluer un acide concentré en sécurité, on verse :", ["l'acide dans l'eau, lentement, avec des lunettes", "l'eau dans l'acide, rapidement", "l'acide et l'eau en même temps sans précaution", "l'acide sur la peau pour tester"], "Verser l'eau dans l'acide concentré peut provoquer des projections dangereuses.", "S"], ["L'eau du robinet a un pH de 6,8. Elle est :", ["légèrement acide, presque neutre", "très acide", "très basique", "exactement neutre"], "6,8 est un peu inférieur à 7 : très légèrement acide.", "S"], ["Une solution acide de pH = 3 est mélangée à une solution basique en quantité convenable. Le pH obtenu est 7 : on parle de :", ["neutralisation", "dilution", "dissolution", "combustion"], "Les ions H⁺ de l'acide réagissent avec les ions HO⁻ de la base.", "S"]], "Action des solutions acides et basiques sur les métaux": [["Pendant la réaction du fer avec l'acide chlorhydrique, le pH de la solution :", ["augmente, car les ions H⁺ sont consommés", "diminue", "reste le même", "devient 0"], "Fe + 2 H⁺ → Fe²⁺ + H₂ : les ions H⁺ disparaissent, la solution devient moins acide.", "S"], ["Fe + 2 H⁺ → Fe²⁺ + H₂. Si 3 atomes de fer réagissent, le nombre d'ions H⁺ consommés est :", ["6", "3", "2", "1,5"], "Chaque atome de fer consomme 2 ions H⁺ : 3 × 2 = 6.", "S"], ["Zn + 2 H⁺ → Zn²⁺ + H₂. Quand 4 ions H⁺ sont consommés, le nombre de molécules H₂ formées est :", ["2", "4", "1", "8"], "2 ions H⁺ donnent 1 molécule H₂ : 4 H⁺ donnent 2 H₂.", "S"], ["2 Al + 6 H⁺ → 2 Al³⁺ + 3 H₂. Quand 4 atomes d'aluminium réagissent, il se forme :", ["6 molécules H₂", "3 molécules H₂", "4 molécules H₂", "12 molécules H₂"], "2 Al donnent 3 H₂ ; 4 Al donnent 2 × 3 = 6 H₂.", "S"], ["Dans Fe + 2 H⁺ → Fe²⁺ + H₂, la charge électrique totale :", ["vaut +2 de chaque côté", "vaut +2 à gauche et 0 à droite", "vaut 0 de chaque côté", "vaut +4 à droite"], "À gauche 2 × (+1) = +2 ; à droite Fe²⁺ = +2 et H₂ = 0. Les charges se conservent.", "S"], ["Dans 2 Al + 6 H⁺ → 2 Al³⁺ + 3 H₂, la charge électrique totale de chaque côté est :", ["+6", "+3", "0", "+2"], "À gauche 6 × (+1) = +6 ; à droite 2 × (+3) = +6.", "S"], ["L'équation équilibrée de la réaction du zinc avec l'acide chlorhydrique est :", ["Zn + 2 H⁺ → Zn²⁺ + H₂", "Zn + H⁺ → Zn⁺ + H", "Zn + 2 H⁺ → Zn²⁺ + 2 H₂", "Zn + H₂ → Zn²⁺ + 2 H⁺"], "Atomes : 1 Zn et 2 H de chaque côté. Charges : +2 de chaque côté.", "S"], ["On met un morceau de cuivre dans l'acide chlorhydrique dilué. On observe :", ["aucune réaction", "un dégagement de dihydrogène", "une solution verte", "un précipité rouge"], "Le cuivre ne réagit pas avec l'acide chlorhydrique dilué.", "S"], ["Un métal réagit avec l'acide chlorhydrique ET avec la soude, en dégageant un gaz qui détone à l'approche d'une flamme. Ce métal peut être :", ["l'aluminium", "le fer", "le cuivre", "l'or"], "L'aluminium (comme le zinc) réagit avec les acides et avec les solutions basiques.", "S"], ["Après la réaction du fer avec l'acide chlorhydrique, on ajoute de la soude à la solution : il se forme un précipité vert. Il révèle les ions :", ["Fe²⁺", "Fe³⁺", "Cu²⁺", "Cl⁻"], "Fe²⁺ donne un précipité vert ; Fe³⁺ un précipité rouille ; Cu²⁺ un précipité bleu.", "S"], ["Un métal réagit avec l'acide ; la solution obtenue donne un précipité blanc avec la soude. Ce métal peut être :", ["le zinc ou l'aluminium", "le fer", "le cuivre", "l'argent"], "Zn²⁺ et Al³⁺ donnent des précipités blancs avec la soude.", "S"], ["Dans la solution obtenue (fer + acide chlorhydrique), le nitrate d'argent donne un précipité blanc qui noircit à la lumière. Il révèle les ions :", ["Cl⁻", "Fe²⁺", "H⁺", "Na⁺"], "C'est le test des ions chlorure, apportés par l'acide chlorhydrique (H⁺ + Cl⁻).", "S"], ["Une plaque de zinc de 13 g est plongée dans l'acide. Après la réaction, il reste 6,5 g de zinc. La masse de zinc qui a réagi est :", ["6,5 g", "19,5 g", "13 g", "2 g"], "13 − 6,5 = 6,5 g de zinc ont été transformés en ions Zn²⁺.", "S"], ["On ne conserve pas le vinaigre ou le jus de citron dans un récipient en aluminium car :", ["l'acide attaque l'aluminium", "l'aluminium rend le jus plus sucré", "l'aluminium est trop lourd", "le jus devient basique"], "L'aluminium réagit avec les solutions acides.", "S"], ["On ne nettoie pas les ustensiles en aluminium avec un produit très basique (soude) car :", ["la soude attaque l'aluminium", "la soude ne nettoie pas", "l'aluminium devient magnétique", "la soude est neutre"], "L'aluminium réagit aussi avec les solutions basiques concentrées.", "S"], ["Le fer réagit-il avec la soude (solution d'hydroxyde de sodium) ?", ["Non, pas de réaction visible", "Oui, avec un fort dégagement de dihydrogène", "Oui, il devient bleu", "Oui, il se transforme en rouille immédiatement"], "Seuls l'aluminium et le zinc, parmi les métaux usuels, réagissent avec la soude.", "S"]]};
+  Object.keys(ADD).forEach(n=>{const c=L.chapters.find(c=>c.name===n);if(c)c.qs.push(...ADD[n]);});
+  /* ajoutée à la fin du tableau pour ne pas changer les codes de quiz existants (lettres = position) */
+  L.chapters.push({sem:0,name:"Les molécules et les réactions chimiques",qs:[["Une molécule est :", ["un assemblage d'atomes liés entre eux", "un atome isolé", "un ion positif", "une particule de lumière"], "Exemple : la molécule d'eau H₂O est formée de 3 atomes liés.", ""], ["La formule CO₂ indique que la molécule contient :", ["1 atome de carbone et 2 atomes d'oxygène", "2 atomes de carbone et 1 atome d'oxygène", "2 molécules de carbone", "1 atome de cobalt"], "L'indice 2 s'applique à l'atome qui le précède (O).", ""], ["Le nombre total d'atomes dans une molécule de glucose C₆H₁₂O₆ est :", ["24", "3", "12", "18"], "6 + 12 + 6 = 24 atomes.", "S"], ["3 H₂O représente :", ["3 molécules d'eau, soit 6 atomes H et 3 atomes O", "1 molécule avec 3 atomes H", "6 molécules d'eau", "3 atomes d'eau"], "Le coefficient 3 multiplie toute la molécule : 3 × 2 = 6 H et 3 × 1 = 3 O.", "S"], ["Le nombre total d'atomes dans 2 CH₄ est :", ["10", "5", "6", "8"], "Une molécule CH₄ a 5 atomes ; 2 molécules en ont 2 × 5 = 10.", "S"], ["La formule d'une molécule formée de deux atomes d'azote est :", ["N₂", "2 N", "N²", "Az₂"], "2 N représente deux atomes séparés ; N₂ représente une molécule.", ""], ["La différence entre 2 O et O₂ est :", ["2 O = deux atomes séparés ; O₂ = une molécule de deux atomes liés", "c'est la même chose", "2 O est une molécule, O₂ deux atomes", "O₂ contient 4 atomes"], "Le coefficient compte des entités séparées ; l'indice compte les atomes liés dans une molécule.", ""], ["Un corps pur simple est formé :", ["d'un seul type d'atomes, comme O₂ ou N₂", "de plusieurs types d'atomes", "toujours d'ions", "d'un mélange de gaz"], "H₂O est un corps pur composé (deux types d'atomes).", ""], ["Lequel de ces corps purs est composé ?", ["H₂O", "O₂", "N₂", "H₂"], "L'eau contient deux types d'atomes : hydrogène et oxygène.", ""], ["Dans les modèles moléculaires, l'atome de carbone est représenté par une boule :", ["noire", "rouge", "blanche", "bleue"], "Convention : carbone noir, oxygène rouge, hydrogène blanc, azote bleu.", ""], ["Au cours d'une réaction chimique :", ["les atomes se conservent, mais les molécules se transforment", "les atomes disparaissent", "de nouveaux atomes apparaissent", "rien ne change"], "Les atomes des réactifs se réarrangent pour former les molécules des produits.", ""], ["La loi de Lavoisier dit que :", ["la masse des réactifs consommés est égale à la masse des produits formés", "la masse augmente toujours", "la masse diminue toujours", "le volume se conserve toujours"], "« Rien ne se perd, rien ne se crée, tout se transforme. »", ""], ["C + O₂ → CO₂. 3 g de carbone réagissent avec 8 g de dioxygène. La masse de CO₂ formée est :", ["11 g", "5 g", "24 g", "3 g"], "Conservation de la masse : 3 + 8 = 11 g.", "S"], ["2 H₂ + O₂ → 2 H₂O. 4 g de dihydrogène réagissent avec 32 g de dioxygène. La masse d'eau formée est :", ["36 g", "28 g", "128 g", "8 g"], "4 + 32 = 36 g. Soustraire (28) ou multiplier (128) sont des erreurs.", "S"], ["Fe + S → FeS. 5,6 g de fer réagissent avec 3,2 g de soufre. La masse de sulfure de fer formé est :", ["8,8 g", "2,4 g", "17,92 g", "5,6 g"], "5,6 + 3,2 = 8,8 g.", "S"], ["On obtient 22 g de sulfure de fer FeS à partir de 14 g de fer. La masse de soufre consommée est :", ["8 g", "36 g", "22 g", "14 g"], "m(S) = 22 − 14 = 8 g.", "S"], ["4 g de dihydrogène réagissent avec 32 g de dioxygène. Pour 1 g de dihydrogène, il faut :", ["8 g de dioxygène", "32 g de dioxygène", "4 g de dioxygène", "128 g de dioxygène"], "Les masses sont proportionnelles : 32 / 4 = 8 g.", "S"], ["L'équation équilibrée de la formation de l'eau est :", ["2 H₂ + O₂ → 2 H₂O", "H₂ + O₂ → H₂O", "H₂ + O₂ → H₂O₂", "2 H + O₂ → 2 H₂O"], "À gauche : 4 H et 2 O ; à droite : 2 × 2 = 4 H et 2 O.", "S"], ["Pour équilibrer N₂ + … H₂ → 2 NH₃, le coefficient de H₂ est :", ["3", "2", "1", "6"], "2 NH₃ contiennent 6 H, soit 3 molécules H₂.", "S"], ["Pour équilibrer … C + O₂ → 2 CO, le coefficient de C est :", ["2", "1", "4", "3"], "2 CO contiennent 2 atomes de carbone.", "S"], ["Dans 2 H₂ + O₂ → 2 H₂O, les réactifs sont :", ["H₂ et O₂", "H₂O seulement", "O₂ seulement", "H₂O et O₂"], "Les réactifs sont à gauche de la flèche ; le produit (H₂O) est à droite.", ""], ["Pour équilibrer une équation, on n'a pas le droit de changer les indices car :", ["cela changerait la nature des molécules", "les indices sont toujours égaux à 1", "cela changerait la couleur", "c'est plus long"], "H₂O et H₂O₂ sont deux corps différents : on ne change que les coefficients.", ""], ["On fait réagir du carbone et du dioxygène dans un flacon fermé posé sur une balance. Pendant la réaction, la masse affichée :", ["reste constante", "augmente", "diminue", "devient nulle"], "Le flacon est fermé : rien ne sort ni n'entre, la masse totale se conserve.", ""], ["On brûle une feuille de papier à l'air libre : les cendres pèsent moins que la feuille. Pourquoi ?", ["des gaz produits (CO₂, vapeur d'eau) partent dans l'air", "la masse disparaît pendant la combustion", "le papier perd de la masse sans rien produire", "la balance est fausse"], "La masse se conserve, mais une partie des produits est gazeuse et s'échappe.", ""], ["Le nombre d'atomes d'oxygène dans 2 CO₂ + 2 H₂O est :", ["6", "4", "3", "8"], "2 CO₂ : 4 atomes O ; 2 H₂O : 2 atomes O. Total 6.", "S"], ["CH₄ + 2 O₂ → CO₂ + 2 H₂O. Pour 3 molécules de méthane, il faut :", ["6 molécules de dioxygène", "2 molécules de dioxygène", "3 molécules de dioxygène", "5 molécules de dioxygène"], "1 CH₄ pour 2 O₂ : 3 CH₄ pour 3 × 2 = 6 O₂.", "S"], ["2 H₂ + O₂ → 2 H₂O. Avec 10 molécules H₂ et 5 molécules O₂, on obtient :", ["10 molécules d'eau", "5 molécules d'eau", "15 molécules d'eau", "20 molécules d'eau"], "Autant de molécules d'eau que de molécules H₂ : 10.", "S"], ["Lequel de ces faits montre qu'une réaction chimique a eu lieu ?", ["l'apparition d'un nouveau corps (gaz, précipité, changement de couleur)", "la fusion de la glace", "la dissolution du sucre", "l'évaporation de l'eau"], "Fusion, dissolution et évaporation sont des transformations physiques.", ""], ["La fusion de la glace est :", ["une transformation physique, pas une réaction chimique", "une réaction chimique", "une combustion", "une oxydation"], "L'eau reste de l'eau (H₂O) : seul son état physique change.", ""], ["Dans une équation chimique, la flèche « → » se lit :", ["« donne » ou « se transforme en »", "« égal »", "« plus »", "« moins »"], "Réactifs → produits : les réactifs se transforment en produits.", ""], ["Le modèle moléculaire de l'eau est formé de :", ["une boule rouge (O) liée à deux boules blanches (H)", "deux boules rouges et une blanche", "une boule noire et deux rouges", "trois boules blanches"], "H₂O : 1 atome d'oxygène (rouge) et 2 atomes d'hydrogène (blancs).", ""]]});
+  const ORD=["Quelques matériaux utilisés au quotidien","La combustion des matériaux organiques","L'oxydation des métaux dans l'air","Les atomes et les ions","Les molécules et les réactions chimiques","Les solutions acides et basiques (pH)","Action des solutions acides et basiques sur les métaux","Tests de reconnaissance de quelques ions","Dangers de quelques matériaux usuels"];
+  L.chapters.forEach(c=>{const k=ORD.indexOf(c.name);if(k>=0)c.ord=k;});
+})();
+const order=L=>L.chapters.map((c,i)=>i).sort((a,b)=>(L.chapters[a].sem-L.chapters[b].sem)||((L.chapters[a].ord??a)-(L.chapters[b].ord??b)));
+const numOf=(L,i)=>order(L).indexOf(i)+1;
+
 const QN=10, LETTERS="ABCD", SALT="laboqcm-pc-2026";
 const rnd=n=>Math.floor(Math.random()*n);
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
@@ -1102,19 +1121,61 @@ function copyText(text,btn){
     try{document.execCommand("copy");done()}catch(e){btn.textContent="Sélectionnez le texte pour le copier"}ta.remove()};
   try{navigator.clipboard.writeText(text).then(done,fallback)}catch(e){fallback()}
 }
-function toQuestions(pool,n){return shuffle(pool).slice(0,n).map(({q,ch})=>({text:q[0],answer:q[1][0],opts:shuffle(q[1]),exp:q[2],ch}))}
+function toQuestions(pool,n){return shuffle(pool).slice(0,n).map(({q,ch})=>({text:q[0],answer:q[1][0],opts:shuffle(q[1]),exp:q[2],ch,s:q[3]==="S"}))}
 function poolOf(level,idx){const L=BANK[level];return idx.flatMap(i=>L.chapters[i].qs.map(q=>({q,ch:L.chapters[i].name})))}
 
 /* ---------- Codes de quiz : "2AC-ADF" = 2AC, leçons A, D et F (A = leçon 1) ---------- */
 const ABC="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const makeCode=(level,idx)=>level+"-"+idx.slice().sort((a,b)=>a-b).map(i=>ABC[i]).join("");
+/* Réglages de temps ajoutés au code : "-T15" = 15 minutes ; "-J1410-1000A1030" = ouvert le 14/10 de 10:00 à 10:30 */
+const p2=n=>String(n).padStart(2,"0");
+const MAX_TRIES=2;
+function makeCode(level,idx,o){
+  o=o||{};let c=level+"-"+idx.slice().sort((a,b)=>a-b).map(i=>ABC[i]).join("");
+  if(o.t)c+="-T"+o.t;
+  if(o.p)c+="-P";
+  if(o.w)c+="-J"+o.w.dd+o.w.mm+"-"+o.w.h1+"A"+o.w.h2;
+  return c;
+}
+function winDates(w){
+  const now=new Date();let y=now.getFullYear();
+  const mk=(yy,hm)=>new Date(yy,+w.mm-1,+w.dd,+hm.slice(0,2),+hm.slice(2));
+  if(mk(y,w.h2)<now-200*864e5)y++;
+  return{from:mk(y,w.h1),to:mk(y,w.h2)};
+}
 function parseCode(c){
   c=String(c||"").trim().toUpperCase().replace(/\s+/g,"");
-  const m=c.match(/^([123]AC)-?([A-Z]+)$/);if(!m)return null;
+  const m=c.match(/^([123]AC)-?([A-Z]+)((?:-[A-Z0-9]+)*)$/);if(!m)return null;
   const L=BANK[m[1]];const idx=[...new Set(m[2].split("").map(d=>ABC.indexOf(d)))].sort((a,b)=>a-b);
   if(idx.some(i=>i>=L.chapters.length))return null;
+  let t=0,dd="",mm="",w=null,pp=false;
+  for(const k of m[3].split("-").filter(Boolean)){
+    let x;
+    if(x=k.match(/^T(\d{1,3})$/)){t=+x[1];if(t<1||t>180)return null}
+    else if(k==="P")pp=true;
+    else if(x=k.match(/^J(\d{2})(\d{2})$/)){dd=x[1];mm=x[2];if(+dd<1||+dd>31||+mm<1||+mm>12)return null}
+    else if(x=k.match(/^(\d{4})A(\d{4})$/)){if(!dd)return null;w={dd,mm,h1:x[1],h2:x[2]}}
+    else return null;
+  }
+  if(dd&&!w)return null;
+  if(w){const ok=h=>+h.slice(0,2)<24&&+h.slice(2)<60;if(!ok(w.h1)||!ok(w.h2)||w.h2<=w.h1)return null}
   const n=idx.reduce((t,i)=>t+L.chapters[i].qs.length,0);
-  return{level:m[1],idx,code:makeCode(m[1],idx),n};
+  return{level:m[1],idx,code:makeCode(m[1],idx,{t,w,p:pp}),n,t,w,p:pp};
+}
+const hm=h=>h.slice(0,2)+":"+h.slice(2);
+function timeRules(code){
+  const r=[];
+  if(code.t)r.push(`Durée : ${code.t} min`);
+  if(code.p)r.push("Démarré par le professeur");
+  if(code.w)r.push(`Ouvert le ${code.w.dd}/${code.w.mm} de ${hm(code.w.h1)} à ${hm(code.w.h2)}`);
+  return r.join(" · ");
+}
+/* null si le quiz peut commencer maintenant, sinon le message à afficher */
+function windowBlock(code){
+  if(!code.w)return null;
+  const {from,to}=winDates(code.w),now=new Date();
+  if(now<from)return`Ce quiz n'est pas encore ouvert. Il ouvre le ${code.w.dd}/${code.w.mm} à ${hm(code.w.h1)}.`;
+  if(now>=to)return`Ce quiz est fermé depuis le ${code.w.dd}/${code.w.mm} à ${hm(code.w.h2)}.`;
+  return null;
 }
 /* ---------- Signature des résultats (empêche de modifier la note dans le message) ---------- */
 function hash(s){let h=2166136261;for(const ch of s){h^=ch.codePointAt(0);h=Math.imul(h,16777619)>>>0}
@@ -1137,12 +1198,19 @@ function decMail(t){try{t=String(t||"").replace(/-/g,"+").replace(/_/g,"/");whil
 /* Adresse de la page à donner aux élèves : la page publique GitHub Pages (utilisée aussi depuis la page Claude et l'application Android). */
 const SHARE_BASE="https://redabirharassen.github.io/labo-qcm/";
 const FRAMED=(()=>{try{return window.top!==window.self}catch(e){return true}})();
-const pageBase=()=>(!FRAMED&&/^https?:$/.test(location.protocol))?location.href.split("#")[0]:SHARE_BASE;
+const NATIVE=location.hostname==="app.local";
+const pageBase=()=>(!FRAMED&&!NATIVE&&/^https?:$/.test(location.protocol))?location.href.split("#")[0]:SHARE_BASE;
 const quizLink=(code,mail)=>pageBase()+"#"+code+(mail?"~"+encMail(mail):"");
 function readHash(){
   const [c,t]=location.hash.slice(1).split("~");
   const mail=decMail(t);if(mail)LS.set("lq-tmail",mail);
   return parseCode(c);
+}
+/* le champ accepte le code (3AC-AR) ou le lien complet du professeur (…#3AC-AR~xxxx), qui contient son e-mail */
+function codeFromInput(v){
+  v=String(v||"").trim();const h=v.match(/#([A-Za-z0-9-]+)(?:~([A-Za-z0-9_-]+))?/);
+  if(h){const m=decMail(h[2]);if(m)LS.set("lq-tmail",m);return parseCode(h[1])}
+  return parseCode(v);
 }
 function mailto(mail,r,msg){
   const e=encodeURIComponent;
@@ -1191,19 +1259,21 @@ function home(){
     <h2>Passer un quiz</h2>
     <label for="nm">Nom et prénom</label><input id="nm" maxlength="40" autocomplete="name" value="${esc(me.name)}">
     <label for="cl">Classe</label><input id="cl" maxlength="15" placeholder="exemple : 2AC-3" value="${esc(me.cls)}">
-    <label for="cd">Code du quiz</label><input id="cd" maxlength="32" placeholder="exemple : 2AC-ADF" autocapitalize="characters" value="${pre?pre.code:""}">
+    <label for="cd">Code du quiz (ou lien envoyé par le professeur)</label><input id="cd" maxlength="400" placeholder="exemple : 2AC-ADF" autocapitalize="characters" value="${pre?pre.code:""}">
+    ${pre&&timeRules(pre)?`<p class="rules">⏱ ${esc(timeRules(pre))}</p>`:""}
+    <p class="muted">Tu peux faire chaque quiz ${MAX_TRIES} fois au maximum.</p>
     <p class="err" id="err" hidden></p>
     <button class="btn" type="submit">Commencer le quiz</button>
     ${canSend()?`<p class="muted">À la fin du quiz, ton nom, ta classe et ta note sont envoyés à ton professeur.</p>`:""}
   </form>
   <button class="btn ghost" id="train">S'entraîner librement</button>
   <button class="link" id="prof">Espace professeur</button>
-  ${FRAMED||!/^https?:$/.test(location.protocol)?"":`<a class="link" href="confidentialite.html">Confidentialité</a>`}`;
+  ${FRAMED||!/^https?:$/.test(location.protocol)?"":`<a class="link" href="${NATIVE?SHARE_BASE+"confidentialite.html":"confidentialite.html"}">Confidentialité</a>`}`;
   document.getElementById("train").onclick=practiceHome;
   document.getElementById("prof").onclick=()=>teacher();
   document.getElementById("f").onsubmit=e=>{
     e.preventDefault();
-    const name=clean(document.getElementById("nm").value),cls=clean(document.getElementById("cl").value),code=parseCode(document.getElementById("cd").value),err=document.getElementById("err");
+    const name=clean(document.getElementById("nm").value),cls=clean(document.getElementById("cl").value),code=codeFromInput(document.getElementById("cd").value),err=document.getElementById("err");
     const fail=t=>{err.textContent=t;err.hidden=false};
     if(name.length<2)return fail("Écris ton nom et ton prénom.");
     if(!cls)return fail("Écris ta classe.");
@@ -1211,21 +1281,101 @@ function home(){
     LS.set("lq-me",{name,cls});
     const done=LS.get("lq-done-"+code.code,null);
     if(done&&norm(done.rec.name)===norm(name))return examResult(done);
-    let run=LS.get("lq-run",null);
-    if(!run||run.quiz!==code.code||norm(run.name)!==norm(name)){
-      run={name,cls,quiz:code.code,level:code.level,qs:toQuestions(poolOf(code.level,code.idx),QN),i:0,picks:[]};
-      LS.set("lq-run",run);
-    }
-    examAsk(run);
+    const btn=e.submitter||document.querySelector("#f .btn");
+    startExam(code,name,cls,fail,btn);
   };
 }
 
+/* Démarre un essai : plage horaire, 2 essais par téléphone, 2 essais par élève (vérifiés par la feuille Google) */
+const triesKey=q=>"lq-tries-"+q;
+/* Quiz lancé par le professeur : état partagé par le script Google ({on, stopped, at}) */
+async function sheetCall(body,ms){
+  const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),ms||8000);
+  try{const res=await fetch(SHEET_URL,{method:"POST",signal:ctl.signal,headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)});
+    return JSON.parse(await res.text())}finally{clearTimeout(tm)}
+}
+async function liveStatus(quiz){try{const j=await sheetCall({action:"status",quiz});return j&&j.ok?j:null}catch(e){return null}}
+let waitTimer=null;
+function waitScreen(code,name,cls,retry){
+  clearInterval(waitTimer);setColor(code.level);
+  $app.innerHTML=`
+  <section class="board wait"><span class="dot">⏳</span><h1>En attente du professeur</h1>
+    <p>Quiz ${esc(code.code)} · ${esc(name)}. Le quiz commencera tout seul dès que ton professeur appuiera sur « Démarrer ». Garde cette page ouverte.</p></section>
+  <p class="muted" id="wst" style="text-align:center" aria-live="polite"></p>
+  <button class="btn ghost" id="home">Retour à l'accueil</button>`;
+  document.getElementById("home").onclick=()=>{clearInterval(waitTimer);waitTimer=null;home()};
+  const poll=async()=>{
+    const j=await liveStatus(code.code);const st=document.getElementById("wst");
+    if(!st){clearInterval(waitTimer);waitTimer=null;return}
+    if(!j){st.textContent="Connexion difficile… nouvel essai dans quelques secondes.";return}
+    st.textContent="";
+    if(j.on){clearInterval(waitTimer);waitTimer=null;retry()}
+    else if(j.stopped){clearInterval(waitTimer);waitTimer=null;st.textContent="Le professeur a terminé ce quiz."}
+  };
+  waitTimer=setInterval(poll,4000);poll();
+}
+async function checkServer(name,cls,quiz){
+  if(!canSend())return null;
+  try{
+    const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),8000);
+    const res=await fetch(SHEET_URL,{method:"POST",signal:ctl.signal,headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify({action:"check",name,cls,quiz})});
+    clearTimeout(tm);const j=JSON.parse(await res.text());
+    return typeof j.count==="number"?j.count:null;
+  }catch(e){return null}
+}
+async function startExam(code,name,cls,fail,btn){
+  let run=LS.get("lq-run",null);
+  if(run&&run.quiz===code.code&&norm(run.name)===norm(name)&&run.i<run.qs.length)return examAsk(run);
+  const blocked=windowBlock(code);if(blocked)return fail(blocked);
+  const tries=LS.get(triesKey(code.code),0);
+  if(tries>=MAX_TRIES)return fail(`Ce quiz a déjà été fait ${MAX_TRIES} fois sur ce téléphone. Tu ne peux plus le refaire.`);
+  const label=btn?btn.textContent:"";
+  if(btn){btn.disabled=true;btn.textContent="Vérification…"}
+  const count=await checkServer(name,cls,code.code);
+  if(count!=null&&count>=MAX_TRIES){if(btn&&btn.isConnected){btn.disabled=false;btn.textContent=label}
+    return fail(`Tu as déjà fait ce quiz ${MAX_TRIES} fois. Tu ne peux plus le refaire.`)}
+  if(code.p){
+    if(!canSend()){if(btn&&btn.isConnected){btn.disabled=false;btn.textContent=label}
+      return fail("Ce quiz est lancé par le professeur : ouvre-le dans l'application Labo QCM ou avec le lien du professeur.")}
+    const j=await liveStatus(code.code);
+    if(btn&&btn.isConnected){btn.disabled=false;btn.textContent=label}
+    if(!j)return fail("Impossible de joindre le serveur. Vérifie ta connexion Internet puis réessaie.");
+    if(j.stopped&&!j.on)return fail("Le professeur a terminé ce quiz.");
+    if(!j.on)return waitScreen(code,name,cls,()=>startExam(code,name,cls,t=>{home();const e=document.getElementById("err");if(e){e.textContent=t;e.hidden=false}}));
+  }
+  if(btn&&btn.isConnected){btn.disabled=false;btn.textContent=label}
+  const blocked2=windowBlock(code);if(blocked2)return fail(blocked2);
+  const now=Date.now();let deadline=0;
+  if(code.t)deadline=now+code.t*60000;
+  if(code.w){const to=+winDates(code.w).to;deadline=deadline?Math.min(deadline,to):to}
+  LS.set(triesKey(code.code),tries+1);
+  run={name,cls,quiz:code.code,level:code.level,qs:toQuestions(poolOf(code.level,code.idx),QN),i:0,picks:[],
+    start:now,deadline,attempt:Math.max(tries,count||0)+1};
+  LS.set("lq-run",run);
+  examAsk(run);
+}
+
 /* ================= QUIZ NOTÉ ================= */
+let examTimer=null;
+const fmtLeft=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return Math.floor(s/60)+":"+p2(s%60)};
+function finishExam(run){
+  clearInterval(examTimer);examTimer=null;
+  const n=run.qs.length;
+  const score=run.qs.filter((x,k)=>x.answer===run.picks[k]).length;
+  const rec={name:run.name,cls:run.cls,quiz:run.quiz,score,total:n,date:nowStr()};rec.sig=sign(rec);
+  const done={rec,level:run.level,qs:run.qs,picks:run.qs.map((x,k)=>run.picks[k]??null),mail:LS.get("lq-tmail",""),auto:canSend(),
+    attempt:run.attempt||1,timeout:run.i<n&&!run.stopped,stopped:!!run.stopped&&run.i<n};
+  LS.set("lq-done-"+run.quiz,done);LS.del("lq-run");examResult(done);
+}
 function examAsk(run){
+  clearInterval(examTimer);examTimer=null;
+  if(run.deadline&&Date.now()>=run.deadline)return finishExam(run);
   const q=run.qs[run.i],n=run.qs.length;setColor(run.level);let pick=null;
   $app.innerHTML=`
   <div class="top"><span class="count">${esc(run.name)}</span><div class="bar"><i style="width:${run.i/n*100}%"></i></div><span class="count">${run.i+1}/${n}</span></div>
-  <section class="question pop"><span class="tag">Quiz ${run.quiz} · ${esc(q.ch)}</span><div class="q">${esc(q.text)}</div></section>
+  ${run.deadline?`<div class="timer" id="timer" role="timer" aria-live="off">⏱ <span id="tleft">${fmtLeft(run.deadline-Date.now())}</span></div>`:""}
+  <section class="question pop"><span class="tag">Quiz ${run.quiz} · ${esc(q.ch)}${q.s?" · Synthèse":""}</span><div class="q">${esc(q.text)}</div></section>
   <div class="opts">${q.opts.map((o,k)=>`<button class="opt" data-k="${k}"><span class="letter">${LETTERS[k]}</span><span>${esc(o)}</span></button>`).join("")}</div>
   <button class="btn" id="next" disabled>${run.i+1<n?"Valider et continuer":"Valider et terminer"}</button>
   <p class="muted" style="text-align:center">Choisis une réponse. Tu ne pourras pas revenir en arrière.</p>`;
@@ -1235,11 +1385,32 @@ function examAsk(run){
     if(pick==null)return;
     run.picks[run.i]=q.opts[pick];run.i++;LS.set("lq-run",run);
     if(run.i<n)return examAsk(run);
-    const score=run.qs.filter((x,k)=>x.answer===run.picks[k]).length;
-    const rec={name:run.name,cls:run.cls,quiz:run.quiz,score,total:n,date:nowStr()};rec.sig=sign(rec);
-    const done={rec,level:run.level,qs:run.qs,picks:run.picks,mail:LS.get("lq-tmail",""),auto:canSend()};
-    LS.set("lq-done-"+run.quiz,done);LS.del("lq-run");examResult(done);
+    finishExam(run);
   };
+  if(parseCode(run.quiz)?.p&&canSend()){
+    const myq=run.i;
+    setTimeout(async function chk(){
+      if(!document.getElementById("next")||run.i!==myq)return;
+      const j=await liveStatus(run.quiz);
+      if(!document.getElementById("next")||run.i!==myq)return;
+      if(j&&!j.on&&j.stopped){run.stopped=true;LS.set("lq-run",run);finishExam(run);return}
+      setTimeout(chk,15000);
+    },15000);
+  }
+  if(run.deadline){
+    const tick=()=>{
+      const el=document.getElementById("tleft");
+      if(!el){clearInterval(examTimer);examTimer=null;return}
+      const left=run.deadline-Date.now();
+      el.textContent=fmtLeft(left);
+      document.getElementById("timer").classList.toggle("low",left<=60000);
+      if(left<=0){
+        if(pick!=null){run.picks[run.i]=q.opts[pick]}
+        LS.set("lq-run",run);finishExam(run);
+      }
+    };
+    examTimer=setInterval(tick,500);
+  }
 }
 function examResult(done){
   const r=done.rec,s=starsOf(r.score/r.total),msg=message(r);setColor(done.level);
@@ -1247,7 +1418,9 @@ function examResult(done){
   const auto=canSend()&&(done.auto||done.sent);
   $app.innerHTML=`
   <section class="board result"><span class="label" style="color:var(--boardink);opacity:.85">${esc(r.name)} · ${esc(r.cls)} · Quiz ${r.quiz}</span>
-    <div class="big">${r.score}/${r.total}</div><div class="stars">${starsHTML(s)}</div><p>Terminé le ${esc(r.date)}</p></section>
+    <div class="big">${r.score}/${r.total}</div><div class="stars">${starsHTML(s)}</div><p>Terminé le ${esc(r.date)}${done.attempt?` · Essai ${done.attempt}/${MAX_TRIES}`:""}</p>
+    ${done.timeout?`<p><b>Temps écoulé :</b> les questions sans réponse comptent comme fausses.</p>`:""}
+    ${done.stopped?`<p><b>Le professeur a arrêté le quiz :</b> les questions sans réponse comptent comme fausses.</p>`:""}</section>
   <div class="card"><h2 id="sh">${auto?"Ta note pour ton professeur":"Envoie ta note à ton professeur"}</h2>
     ${auto?`<div id="sst" aria-live="polite"></div><p class="muted" id="alt" hidden>Tu peux aussi envoyer ta note toi-même :</p>`:""}
     <div id="manual" style="display:contents"${auto?" hidden":""}>
@@ -1256,14 +1429,22 @@ function examResult(done){
     <div class="row"><span class="label">Adresse du professeur</span></div>
     <div class="row"><span class="addr" id="tm">${esc(tm)}</span><button class="small-btn ghost" id="cpm">Copier l'adresse</button></div>`
     :`<p class="muted">Copie ce message et envoie-le à ton professeur (WhatsApp, e-mail…).</p>`}
+    ${NATIVE&&window.Android&&window.Android.shareText?`<button class="btn" id="share">Envoyer ma note (WhatsApp, e-mail…)</button>
+    <p class="muted">Choisis WhatsApp ou ta messagerie, puis envoie le message à ton professeur sans le modifier.</p>`:""}
     <div class="msg" id="msg">${esc(msg)}</div>
     <p class="muted">Ne modifie pas le message : sinon il sera refusé.</p>
     <button class="small-btn" id="cp">Copier le message</button></div></div>
   <div class="label">Correction</div>
   <div class="review">${done.qs.map((q,k)=>{const ok=q.answer===done.picks[k];return`<div class="corr ${ok?"":"wrong"}"><b>${k+1}.</b> ${esc(q.text)}<br>
-    ${ok?`<span class="good">✓ ${esc(q.answer)}</span>`:`<span class="you">✗ Ta réponse : ${esc(done.picks[k])}</span><br><span class="good">✓ ${esc(q.answer)}</span>`}<br>${esc(q.exp)}</div>`}).join("")}</div>
+    ${ok?`<span class="good">✓ ${esc(q.answer)}</span>`:`<span class="you">✗ ${done.picks[k]==null?"Pas de réponse (temps écoulé)":"Ta réponse : "+esc(done.picks[k])}</span><br><span class="good">✓ ${esc(q.answer)}</span>`}<br>${esc(q.exp)}</div>`}).join("")}</div>
+  ${canRetry(done)?`<div class="card"><h2>Refaire le quiz</h2><p class="muted">Tu peux refaire ce quiz une seule fois. Ton professeur verra tes ${MAX_TRIES} notes.</p>
+    <p class="err" id="rerr" hidden></p><button class="btn ghost" id="redo">Refaire le quiz (dernier essai)</button></div>`:""}
   <button class="btn ghost" id="home">Retour à l'accueil</button>`;
+  const rd=document.getElementById("redo");
+  if(rd)rd.onclick=()=>{const c=parseCode(r.quiz),re=document.getElementById("rerr");
+    if(c)startExam(c,r.name,r.cls,t=>{re.textContent=t;re.hidden=false},rd)};
   document.getElementById("cp").onclick=e=>copyText(msg,e.currentTarget);
+  const shb=document.getElementById("share");if(shb)shb.onclick=()=>{try{window.Android.shareText(msg)}catch(e){}};
   if(tm)document.getElementById("cpm").onclick=e=>copyText(tm,e.currentTarget);
   document.getElementById("home").onclick=home;
   if(auto){
@@ -1272,7 +1453,7 @@ function examResult(done){
       if(!sst.isConnected)return;
       if(state==="ok"){sst.innerHTML=`<p class="ok-text">✓ Ta note a été envoyée à ton professeur.</p>`;manual.hidden=true;alt.hidden=true}
       else if(state==="wait"){sst.innerHTML=`<p class="muted">Envoi de ta note à ton professeur…</p>`}
-      else{sst.innerHTML=`<p class="err">La note n'a pas pu être envoyée. Vérifie ta connexion Internet.</p><div class="row"><button class="small-btn" id="retry">Réessayer l'envoi</button></div>`;
+      else{sst.innerHTML=`<p class="err">La note n'a pas pu être envoyée automatiquement. Vérifie ta connexion Internet, ou envoie-la toi-même ci-dessous.</p><div class="row"><button class="small-btn" id="retry">Réessayer l'envoi</button></div>`;
         manual.hidden=false;alt.hidden=false;document.getElementById("retry").onclick=go}
     };
     const go=()=>{show("wait");sendGrade(done).then(()=>show("ok"),()=>show("ko"))};
@@ -1280,8 +1461,87 @@ function examResult(done){
   }
 }
 
+/* Panneau « Démarrer / Arrêter » de l'espace professeur */
+const liveKeyOf=()=>(accounts()[profUser]||{}).live||"";
+async function livePanel(code){
+  const st=document.getElementById("lstate"),bt=document.getElementById("lbtns");if(!st)return;
+  const j=await liveStatus(code);
+  if(!st.isConnected)return;
+  const box=document.getElementById("live");
+  if(!j){st.textContent="Serveur injoignable. Vérifiez la connexion Internet.";bt.innerHTML=`<button class="small-btn ghost" id="lre">Réessayer</button>`;
+    document.getElementById("lre").onclick=()=>livePanel(code);return}
+  const t=j.at?new Date(j.at):null,hh=t?p2(t.getHours())+":"+p2(t.getMinutes()):"";
+  box.classList.toggle("on",!!j.on);
+  st.textContent=j.on?`▶ Quiz en cours depuis ${hh}`:j.stopped?`■ Quiz arrêté à ${hh}`:"Quiz pas encore démarré. Les élèves qui entrent le code attendent votre signal.";
+  const needKey=!liveKeyOf();
+  bt.innerHTML=`${needKey?`<label for="linv" style="font-weight:800;font-size:.9rem">Code d'établissement (une seule fois)</label>
+      <input id="linv" autocapitalize="characters" maxlength="20" style="font:inherit;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink)">`:""}
+    ${j.on?`<button class="btn stop" id="lstop">■ Arrêter le quiz</button>`:`<button class="btn go" id="lgo">▶ ${j.stopped?"Redémarrer":"Démarrer"} le quiz</button>`}
+    <p class="muted">${j.on?"« Arrêter » termine le quiz pour tous les élèves : leurs notes sont envoyées avec les réponses déjà données.":"Dès que vous appuyez, tous les élèves en attente commencent en même temps."}</p>`;
+  const act=async(action,b)=>{
+    const msg=document.getElementById("lmsg");let key=liveKeyOf();
+    if(!key){
+      const inv=(document.getElementById("linv").value||"").replace(/\s+/g,"").toUpperCase();
+      if(await sha256("laboqcm-invite|"+inv)!==INVITE_HASH){msg.innerHTML=`<p class="err">Code d'établissement incorrect.</p>`;return}
+      key=await sha256("laboqcm-live|"+inv);const all=accounts();if(all[profUser]){all[profUser].live=key;LS.set("lq-accounts",all)}
+    }
+    b.disabled=true;b.textContent="Envoi…";
+    let r=null;try{r=await sheetCall({action,quiz:code,cle:key})}catch(e){}
+    if(r&&r.ok){msg.innerHTML=`<p class="ok-text">${action==="start"?"Quiz démarré : les élèves peuvent commencer.":"Quiz arrêté pour tous les élèves."}</p>`;livePanel(code)}
+    else{b.disabled=false;b.textContent=action==="start"?"▶ Démarrer le quiz":"■ Arrêter le quiz";
+      msg.innerHTML=`<p class="err">${r&&r.error?esc(r.error):"Le serveur n'a pas répondu. Vérifiez la connexion, et que le script Google est à jour (version 3)."}</p>`}
+  };
+  const g=document.getElementById("lgo");if(g)g.onclick=()=>act("start",g);
+  const s2=document.getElementById("lstop");if(s2)s2.onclick=()=>act("stop",s2);
+}
+function canRetry(done){
+  const c=parseCode(done.rec.quiz);if(!c)return false;
+  return LS.get(triesKey(c.code),0)<MAX_TRIES&&(done.attempt||1)<MAX_TRIES&&!windowBlock(c);
+}
+/* Test de l'envoi vers Google Sheets, depuis l'espace professeur : dit précisément ce qui bloque */
+async function runDiag(){
+  const out=document.getElementById("diagout");if(!out)return;
+  out.innerHTML=`<p class="muted">Test en cours…</p>`;
+  const body=JSON.stringify({name:"TEST Labo QCM (à supprimer)",cls:"TEST",quiz:"TEST",score:0,total:10,date:nowStr(),sig:"TEST"});
+  let kind="",detail="";
+  if(navigator.onLine===false)kind="offline";
+  else try{
+    const res=await fetch(SHEET_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body});
+    const t=await res.text();let j=null;try{j=JSON.parse(t)}catch(e){}
+    if(j&&j.ok)kind="ok";
+    else if(j&&j.error){kind="script";detail=String(j.error)}
+    else if(/accounts\.google|ServiceLogin|signin/i.test(res.url+" "+t.slice(0,3000)))kind="access";
+    else{kind="format";detail="code "+res.status}
+  }catch(e){
+    let reach=false;try{await fetch(SHEET_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body});reach=true}catch(x){}
+    kind=reach?"access":"unreachable";
+  }
+  if(!out.isConnected)return;
+  const fix=`<p class="muted"><b>Pour corriger :</b> ouvrez le script de la feuille « Labo QCM - Notes » (Extensions → Apps Script), puis <b>Déployer → Gérer les déploiements → ✏️ Modifier</b> : « Exécuter en tant que : <b>Moi</b> » et « Qui peut accéder : <b>Tout le monde</b> ». Choisissez « Nouvelle version », puis <b>Déployer</b>.</p>`;
+  out.innerHTML={
+    ok:`<p class="ok-text">✓ L'envoi automatique fonctionne. Une ligne « TEST Labo QCM (à supprimer) » a été ajoutée à la feuille.</p>`,
+    offline:`<p class="err">Cet appareil n'est pas connecté à Internet.</p>`,
+    unreachable:`<p class="err">Le serveur de Google n'a pas pu être joint. Vérifiez la connexion Internet. Si elle fonctionne, l'adresse du script n'est plus valide (déploiement supprimé ou archivé).</p>`+fix,
+    access:`<p class="err">Le script Google refuse les envois : il n'est pas ouvert à « Tout le monde », ou il demande une connexion Google.</p>`+fix+`<p class="muted">Une ligne de test a peut-être été ajoutée malgré tout : supprimez-la si vous la voyez.</p>`,
+    script:`<p class="err">Le script a reçu le test mais a répondu par une erreur : « ${esc(detail)} ».</p><p class="muted">Vérifiez que la feuille et le script n'ont pas été renommés ou supprimés.</p>`,
+    format:`<p class="err">Le script répond, mais pas comme prévu (${esc(detail)}). Son code a peut-être été remplacé.</p>`+fix
+  }[kind];
+}
+
 /* ================= ESPACE PROFESSEUR ================= */
 let tLevel="1AC",tSel=[],confirmWipe=false,tMailDraft=null,tMailMsg="";
+let tDur=0,tWin={on:false,date:"",from:"",to:""},tStart=false,liveMsg="";
+/* réglages de temps choisis par le professeur → {t,w} pour le code, ou {err} */
+function tOpts(){
+  const o={t:tDur||0,w:null,p:tStart};
+  if(tWin.on){
+    const d=tWin.date.match(/^\d{4}-(\d{2})-(\d{2})$/),a=tWin.from.replace(":",""),b=tWin.to.replace(":","");
+    if(!d||!/^\d{4}$/.test(a)||!/^\d{4}$/.test(b))return{err:"Choisissez la date, l'heure d'ouverture et l'heure de fermeture."};
+    if(b<=a)return{err:"L'heure de fermeture doit être après l'heure d'ouverture (le même jour)."};
+    o.w={dd:d[2],mm:d[1],h1:a,h2:b};
+  }
+  return o;
+}
 const mailKey=()=>"lq-mail-"+profUser;
 /* Comptes professeurs : chaque prof crée son compte avec le code d'établissement.
    Les comptes sont enregistrés sur l'appareil (empreinte SHA-256 salée, jamais le mot de passe). */
@@ -1341,7 +1601,7 @@ function login(){
         const h=await sha256("laboqcm|"+u+"|"+salt+"|"+pw);
         const all=accounts();
         if(!Object.keys(all).length){const old=LS.get("lq-grades",null);if(old)LS.set("lq-grades-"+u,old)} /* reprise des notes de l'ancien compte par défaut */
-        all[u]={salt,hash:h,created:nowStr()};LS.set("lq-accounts",all);
+        all[u]={salt,hash:h,created:nowStr(),live:await sha256("laboqcm-live|"+inv)};LS.set("lq-accounts",all);
         authMode="in";return openSession(u,h,keep);
       }
       let h=null;
@@ -1357,7 +1617,9 @@ function teacher(){
   if(!profUser)return login();
   setColor(tLevel);
   const L=BANK[tLevel];
-  const code=tSel.length?makeCode(tLevel,tSel):null;
+  const to=tOpts();
+  const code=tSel.length&&!to.err?makeCode(tLevel,tSel,to):null;
+  const durs=[0,5,10,15,20,25,30,40,45,60,90,120];
   const nAvail=tSel.reduce((t,i)=>t+L.chapters[i].qs.length,0);
   const grades=LS.get(gradesKey(),[]).slice().sort((a,b)=>a.cls.localeCompare(b.cls)||a.name.localeCompare(b.name));
   const valid=grades.filter(g=>g.valid);
@@ -1370,10 +1632,27 @@ function teacher(){
   <div class="card">
     <h2>1. Créer un quiz</h2>
     <div class="tabs">${Object.keys(BANK).map(k=>`<button class="tab" style="--lc:${BANK[k].color}" data-l="${k}" aria-selected="${k===tLevel}">${k}<small>${BANK[k].sub}</small></button>`).join("")}</div>
-    ${L.sems.map((sn,s)=>{const ids=L.chapters.map((c,i)=>c.sem===s?i:-1).filter(i=>i>=0);const all=ids.every(i=>tSel.includes(i));return`
+    ${L.sems.map((sn,s)=>{const ids=order(L).filter(i=>L.chapters[i].sem===s);const all=ids.every(i=>tSel.includes(i));return`
     <div class="row" style="justify-content:space-between"><span class="label">Semestre ${s+1} · ${esc(sn)}</span><button class="small-btn ghost semall" data-s="${s}">${all?"Tout décocher":"Tout cocher"}</button></div>
-    <div class="checks">${ids.map(i=>{const c=L.chapters[i];return`<label class="check"><input type="checkbox" id="ch-${tLevel}-${i}" data-i="${i}" ${tSel.includes(i)?"checked":""}><span>${i+1}. ${esc(c.name)}</span><small>${c.qs.length} q.</small></label>`}).join("")}</div>`}).join("")}
-    ${code?`<div class="codebox"><div><div class="label" style="color:var(--boardink);opacity:.8">Code à donner aux élèves</div><div class="code">${code}</div></div><button class="small-btn" id="cpcode">Copier le code</button></div>
+    <div class="checks">${ids.map(i=>{const c=L.chapters[i];return`<label class="check"><input type="checkbox" id="ch-${tLevel}-${i}" data-i="${i}" ${tSel.includes(i)?"checked":""}><span>${numOf(L,i)}. ${esc(c.name)}</span><small>${c.qs.length} q.</small></label>`}).join("")}</div>`}).join("")}
+    <div class="label" style="margin-top:6px">Temps</div>
+    <div class="form tset">
+      <label for="tdur">Durée du quiz</label>
+      <select id="tdur">${durs.map(d=>`<option value="${d}"${d===tDur?" selected":""}>${d?d+" minutes":"Sans limite de durée"}</option>`).join("")}</select>
+      <label class="check"><input type="checkbox" id="tpon"${tStart?" checked":""}><span>Le quiz commence seulement quand j'appuie sur « Démarrer »</span></label>
+      <label class="check"><input type="checkbox" id="twon"${tWin.on?" checked":""}><span>Ouvrir le quiz seulement à une date et une heure précises</span></label>
+      ${tWin.on?`<div class="times">
+        <label style="grid-column:1/-1">Date<input type="date" id="twd" value="${esc(tWin.date)}"></label>
+        <label>Ouverture<input type="time" id="twf" value="${esc(tWin.from)}"></label>
+        <label>Fermeture<input type="time" id="twt" value="${esc(tWin.to)}"></label></div>`:""}
+      ${to.err&&tSel.length?`<p class="err">${esc(to.err)}</p>`:""}
+      <p class="muted">Chaque élève peut faire le quiz ${MAX_TRIES} fois au maximum. Quand le temps est écoulé, le quiz se termine tout seul et la note est envoyée.</p>
+    </div>
+    ${code?`<div class="codebox"><div style="min-width:0"><div class="label" style="color:var(--boardink);opacity:.8">Code à donner aux élèves</div><div class="code${code.length>9?" long":""}">${code}</div></div><button class="small-btn" id="cpcode">Copier le code</button></div>
+      ${timeRules(parseCode(code))?`<p class="rules">⏱ ${esc(timeRules(parseCode(code)))}</p>`:""}
+      ${tStart?(canSend()?`<div class="live" id="live"><p class="state" id="lstate">Vérification de l'état du quiz…</p>
+        <div id="lbtns"></div><div id="lmsg" aria-live="polite">${liveMsg}</div></div>`
+        :`<p class="err">Le bouton « Démarrer » fonctionne dans l'application Labo QCM et sur la page GitHub, pas dans cet aperçu.</p>`):""}
       <p class="muted">${nAvail} questions disponibles.${nAvail<QN?` Attention : moins de ${QN}, chaque élève aura ${nAvail} questions. Cochez une autre leçon pour arriver à ${QN}.`:""} Écrivez le code au tableau, ou envoyez ce lien aux élèves : le code sera déjà rempli.</p>
       <div class="msg" id="lnk">${esc(link)}</div>
       <div class="row"><button class="small-btn" id="cplink">Copier le lien du quiz</button></div>
@@ -1391,7 +1670,8 @@ function teacher(){
   </form>
   <div class="card">
     <h2>3. Notes des élèves</h2>
-    ${canSend()?`<p class="muted">Les notes des quiz arrivent automatiquement dans la feuille Google Sheets « Labo QCM - Notes », gérée par le responsable de l'application. Le tableau ci-dessous sert aux messages reçus à la main.</p>`:""}
+    ${canSend()?`<p class="muted">Les notes des quiz arrivent automatiquement dans la feuille Google Sheets « Labo QCM - Notes », gérée par le responsable de l'application. Le tableau ci-dessous sert aux messages reçus à la main.</p>
+    <div class="row"><button class="small-btn ghost" id="diag" type="button">Tester l'envoi automatique</button></div><div id="diagout" aria-live="polite"></div>`:""}
     <p class="muted">À la fin du quiz, chaque élève peut aussi vous envoyer un message qui commence par « LaboQCM » (par e-mail ou WhatsApp). Collez ici un ou plusieurs messages.</p>
     <textarea id="paste" rows="4" placeholder="LaboQCM | Nom: … | Classe: … | Quiz: … | Note: …/10 | …"></textarea>
     <div class="row"><button class="small-btn" id="add">Ajouter les notes</button><span id="status" aria-live="polite"></span></div>
@@ -1410,9 +1690,22 @@ function teacher(){
   $app.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{if(b.dataset.l!==tLevel){tLevel=b.dataset.l;tSel=[]}teacher()});
   $app.querySelectorAll(".semall").forEach(b=>b.onclick=()=>{const s=+b.dataset.s;const ids=L.chapters.map((c,i)=>c.sem===s?i:-1).filter(i=>i>=0);const all=ids.every(i=>tSel.includes(i));tSel=all?tSel.filter(i=>!ids.includes(i)):[...new Set([...tSel,...ids])];teacher()});
   $app.querySelectorAll(".check input").forEach(c=>c.onchange=()=>{const i=+c.dataset.i;tSel=c.checked?[...tSel,i]:tSel.filter(x=>x!==i);teacher()});
+  document.getElementById("tdur").onchange=e=>{tDur=+e.target.value;teacher()};
+  document.getElementById("tpon").onchange=e=>{tStart=e.target.checked;teacher()};
+  liveMsg="";
+  if(code&&tStart&&canSend())livePanel(code);
+  document.getElementById("twon").onchange=e=>{
+    tWin.on=e.target.checked;
+    if(tWin.on&&!tWin.date){const d=new Date(Date.now()+5*60000);d.setMinutes(Math.ceil(d.getMinutes()/5)*5,0,0);
+      const e2=new Date(+d+60*60000);
+      tWin.date=`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;tWin.from=`${p2(d.getHours())}:${p2(d.getMinutes())}`;
+      tWin.to=e2.getDate()===d.getDate()?`${p2(e2.getHours())}:${p2(e2.getMinutes())}`:"23:59"}
+    teacher()};
+  [["twd","date"],["twf","from"],["twt","to"]].forEach(([id,k])=>{const el=document.getElementById(id);if(el)el.onchange=e=>{tWin[k]=e.target.value;teacher()}});
   if(code){document.getElementById("cpcode").onclick=e=>copyText(code,e.currentTarget);
     document.getElementById("cplink").onclick=e=>copyText(link,e.currentTarget)}
   tMailMsg="";
+  const dg=document.getElementById("diag");if(dg)dg.onclick=runDiag;
   document.getElementById("tmail").oninput=e=>{tMailDraft=e.target.value};
   document.getElementById("mf").onsubmit=e=>{
     e.preventDefault();
@@ -1452,8 +1745,8 @@ function practiceHome(){
   <div class="label">Leçons de ${prefs.level}</div>
   <div class="lessons">
     <button class="lesson mix" data-c="mix"><span class="num">∑</span><span class="txt"><h3>Toutes les leçons</h3><small>${QN} questions mélangées</small></span><span class="stars">${starsHTML(bestMix!=null?starsOf(bestMix):0)}</span></button>
-    ${L.chapters.map((c,i)=>{const b=prefs.best[prefs.level+":"+i];return`${i===0||L.chapters[i-1].sem!==c.sem?`<div class="label" style="margin-top:8px">Semestre ${c.sem+1} · ${esc(L.sems[c.sem])}</div>`:""}
-    <button class="lesson" data-c="${i}"><span class="num">${i+1}</span><span class="txt"><h3>${esc(c.name)}</h3><small>${c.qs.length} questions${b!=null?` · meilleur : ${Math.round(b*100)} %`:""}</small></span><span class="stars">${starsHTML(b!=null?starsOf(b):0)}</span></button>`}).join("")}
+    ${order(L).map((i,k,arr)=>{const c=L.chapters[i];const b=prefs.best[prefs.level+":"+i];return`${k===0||L.chapters[arr[k-1]].sem!==c.sem?`<div class="label" style="margin-top:8px">Semestre ${c.sem+1} · ${esc(L.sems[c.sem])}</div>`:""}
+    <button class="lesson" data-c="${i}"><span class="num">${k+1}</span><span class="txt"><h3>${esc(c.name)}</h3><small>${c.qs.length} questions${b!=null?` · meilleur : ${Math.round(b*100)} %`:""}</small></span><span class="stars">${starsHTML(b!=null?starsOf(b):0)}</span></button>`}).join("")}
   </div>`;
   document.getElementById("back").onclick=home;
   $app.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{prefs.level=b.dataset.l;savePrefs();practiceHome()});
@@ -1468,7 +1761,7 @@ function pAsk(){
   const {qs,i}=quiz,q=qs[i],n=qs.length;
   $app.innerHTML=`
   <div class="top"><button class="back" id="back">← Leçons</button><div class="bar"><i style="width:${i/n*100}%"></i></div><span class="count">${i+1}/${n}</span></div>
-  <section class="question pop"><span class="tag">${prefs.level} · ${esc(q.ch)}</span><div class="q">${esc(q.text)}</div></section>
+  <section class="question pop"><span class="tag">${prefs.level} · ${esc(q.ch)}${q.s?" · Synthèse":""}</span><div class="q">${esc(q.text)}</div></section>
   <div class="opts">${q.opts.map((o,k)=>`<button class="opt" data-k="${k}"><span class="letter">${LETTERS[k]}</span><span>${esc(o)}</span></button>`).join("")}</div>
   <div id="fb" aria-live="polite"></div>
   <button class="btn" id="next" hidden>${i+1<n?"Question suivante":"Voir mon score"}</button>`;
@@ -1500,9 +1793,10 @@ function pResult(){
 }
 
 /* Reprise automatique d'un quiz noté interrompu (rechargement de la page) */
+window.onAndroidBack=()=>{const b=document.getElementById("back")||document.getElementById("home")||document.getElementById("menu");if(b){b.click();return true}return false};
 readHash();retryPending();
 const pending=LS.get("lq-run",null);
 if(pending&&pending.qs&&pending.i<pending.qs.length)examAsk(pending);else home();
 </script>
-</body>
-</html>
+
+</body></html>
